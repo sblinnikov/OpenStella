@@ -1,0 +1,1642 @@
+\def\giveeqname{0}
+\vsize 23 true cm
+\voffset -2 cm
+\input start5
+\vskip 1 cm
+\title{TREFOR}
+\vskip 1 cm
+\centerline{\sl User's guide and references}
+\vskip 2 cm
+\author{S.~I.~Blinnikov $^{1}$}
+%\authorb{Popolitov V.A.}
+%\institutb{Sternberg Astronomical
+%Institute, Moscow University} {119899, Moscow, Russia}
+%\nextauthor{S.I.Blinnikov \footnote{$^*$}{Present address:
+%
+% \ctrline{ \it {Max-Planck-Institut f\"ur Astrophysik} }
+ %\ctrline{ \it {Karl-Schwarzschild-Str. 1} }
+% \ctrline{ \it {D-8046 Garching b. M\"unchen, FRG} } } }
+\institutb{Institute for Theoretical
+and Experimental Physics} {117218, Moscow, Russia}
+%\OFFPRINTS={S.~I.~Blinnikov}
+%\Date={Received}
+\summary
+A brief description is given of a preprocessor for structured
+design of programs in Fortran or in other languages.
+\endpage
+\chap{Introduction}
+
+
+    Trefor is the text processor for program design, the main feature
+distinguishing it among other preprocessors being its ability to keep
+the structure not only of the code itself but also of the process of
+the construction, of the creation of a program. Using Trefor you
+save the history of the stepwise refinement of the code design in the
+same file which you submit to further compilation and then to run.
+The graph of the process of the stepwise refinement, described in
+many manuals on the structured programming, is actually a ``Tree''
+(in the sense of the Graph Theory). This Tree is saved in your file
+by special notation bookkeeping the nodes of the tree and the paths
+connecting them. The excessive information introduced thereby helps
+you a lot not only in the process of the design, but also at the stage
+of testing and then in supporting and modifying the old codes. The
+Trefor is extensively used in several institutes in USSR and Russia
+since 1983
+and it has withstood the test of time. Originally it was developed
+for Fortran (Trefor = Tree Fortran), but now it is used also for
+REXX, Pascal, C etc.
+
+The origin of the Trefor goes back to the ideas developed mainly
+by E.W. Dijkstra and his colleagues, see the books:
+
+\item{1.} Structured programming,  O.-J. Dahl, E. W. Dijkstra \& C. A. R.
+   Hoare.  London, New York, Academic Press, 1972.
+
+\item{2.} Dijkstra, E. W.
+     A discipline of programming.  Englewood Cliffs, N.J.
+   : Prentice-Hall, 1976.
+
+\item{3.} Wirth, N.
+      Algorithmen und Datenstrukturen.  Stuttgart : Teubner, 1975.
+
+\item{4.} Wirth, N.
+      Algorithms + data structures=programs.  Englewood Cliffs,
+    N.J. : Prentice-Hall, 1976.
+
+\item{5.} Gries, D.,
+      The science of programming.  New York : Springer-Verlag,
+    1983.
+
+
+While designing a code in Trefor you just type in an appropriate
+place (most convenient for you) some special combinations of symbols
+which save the structure of the code. So the ``flowchart'' of the
+code is saved in the code itself, automatically adjusting to any
+changes which you might wish to introduce later.
+We call such a code a ``design tree''.
+More formal definitions are given in Sec.3, but here we give just the
+main idea.
+
+At any place of the code, where one might draw a node in a flowchart
+(all those squares, rhombuses, triangles etc...) we just type
+
+{\tt
+\qquad <*index: any explanatory text *>  }
+
+\par\noindent and then continue with standard Fortran (or C, etc.) text.
+At some moment,
+when we are ready to refine  what is going on
+in the node with our ``index'', we type:
+
+{\tt
+\qquad \%\_ind1\_ind2...\_index: }
+
+\par\noindent where ``ind1'', ``ind2'', ... are the nodes in which
+our node is embedded,
+and so we formally introduce the stepwise refinement.
+
+   There are also other features, making Trefor convenient for writing long
+and complicated codes: macros, alias names, special structure
+constructions etc...
+
+The original version of the Trefor was designed in 1983 by Sergei Weinstein
+(CNIIKA, Moscow, USSR, now retired from Parametric Technology, Haifa, Israel)
+and coded by Sergei Blinnikov (ITEP, Moscow, USSR)
+in Fortran-IV (more primitive than Fortran-77). Some features like alias definitions
+were added later by S.Blinnikov and O.Bartunov together with several versions
+of wrappers for different OS. A C-version of the Trefor compiler was
+coded by Vlad Popolitov (then at SAI, Moscow, Russia).
+One should note that the original Trefor (actually Fortran) version of the preprocessor
+is more robust and virtually free of bugs, while the C-version (which is coded
+directly, not using the preprocessor) sometime may encounter problems on huge
+input files (on order of $10^4$ lines of code). Some improvemenst to MS Windows
+version have been supplied by Yaroslav Urzhumov.
+
+
+\chap{Input language format}
+
+    To tell to the preprocessor, which language you wish to process just
+type (in the text of the Trefor-program):
+
+\qquad \_Fortran
+
+\par\noindent or
+
+\qquad \_REXX
+
+\qquad \_Pascal
+
+\qquad \_C
+
+\par\noindent etc. You may use the mixture of different languages
+in one file, if you wish it for some reason. If you type
+
+\qquad \_Trefor
+
+\par\noindent you return to the standard {\bf Trefor} environment,
+i.e., the preprocessor is
+prepared to output Fortran text, and the input is to be in the
+format where all operators are written from any column you like,
+but they should be delimited by ``;'', and the labels should be
+delimited by ``:''. The {\bf \_Trefor}
+regime is assumed as default in the
+beginning of any file submitted to the preprocessor.
+\smallskip
+{\it Example 1.1}
+
+\par\noindent Pure Fortran text in input:
+\vskip .2cm
+- - - - - - - - - - - - - - - - - - - - - - - - -
+{\obeylines \sfcode`;= 3000
+{\tt
+\qquad \qquad \_FORTRAN
+
+\qquad \qquad IF(A.GT.B)THEN
+
+\qquad \qquad \quad DO 25 \quad I=1,N
+
+\qquad \qquad \quad Y(I,J)=Y(I,J)+Y(I,J+1)
+
+ 25    \qquad \qquad CONTINUE
+
+\qquad \qquad  ENDIF}\par}
+- - - - - - - - - - - - - - - - - - - - - - - - -
+\vskip .2cm
+
+\par\noindent Then the output is almost the same: only one
+comment is added:
+\vskip .2cm
+- - - - - - - - - - - - - - - - - - - - - - - - -
+{\obeylines \sfcode`;=3000
+{\tt
+C-->Fortran section begins....
+
+\qquad \qquad  IF(A.GT.B)THEN
+
+\qquad \qquad \quad DO 25 \quad I=1,N
+
+\qquad \qquad \quad  Y(I,J)=Y(I,J)+Y(I,J+1)
+
+ 25  \qquad \qquad  CONTINUE
+
+\qquad \qquad  ENDIF}\par}
+- - - - - - - - - - - - - - - - - - - - - - - - -
+\vskip .2cm
+
+{\it Example 1.2}
+
+\par\noindent A bit less trivial is the next input text:
+\vskip .2cm
+- - - - - - - - - - - - - - - - - - - - - - - - -
+{\obeylines \sfcode`;=3000
+{\tt
+\qquad \qquad \_FORTRAN
+
+\qquad \qquad   IF(A>B)THEN
+
+\qquad \qquad \quad  \_Do \quad I=1,N
+
+\qquad \qquad \qquad \quad  Y(I,J)=Y(I,J)+Y(I,J+1)
+
+\qquad \qquad \quad   \_od
+
+\qquad \qquad ENDIF}\par}
+- - - - - - - - - - - - - - - - - - - - - - - - -
+\vskip .2cm
+
+\par\noindent Here you may use ``$>$'' instead of ``.GT.'' and the
+``{\bf \_Do}{\bf \_od}'' loop
+(the label is generated by the preprocessor), then the output
+is:
+\vskip .2cm
+- - - - - - - - - - - - - - - - - - - - - - - - -
+{\obeylines \sfcode`;=3000
+{\tt
+C-->Fortran section begins....
+
+\qquad \qquad  IF(A .GT. B)THEN
+
+\qquad \qquad   DO${\,}$32757 \quad I=1,N
+\qquad \qquad \qquad \qquad   Y(I,J)=Y(I,J)+Y(I,J+1)
+
+32757 \quad CONTINUE
+
+\qquad \qquad  ENDIF}\par}
+- - - - - - - - - - - - - - - - - - - - - - - - -
+\vskip .2cm
+
+\par\noindent The preprocessor generates labels in decreasing
+order starting from
+the initial value which may be changed at the installation. The
+standard starting value is below 32767 for compatibility with some old
+translators. You should not use your explicit labels in the range
+(30000--32767) but actually, using the Trefor,
+ you need explicit labels very rarely.
+
+\smallskip
+{\it Example 1.3}
+
+\par\noindent If you omit the word {\bf \_Fortran} in the
+beginning of the file, or if
+you type {\bf \_Trefor} in any place of the text, then the same piece
+may be typed from the first column, but you should then use ``;'' at
+the ends of Fortran operators:
+\vskip .2cm
+- - - - - - - - - - - - - - - - - - - - - - - - -
+{\obeylines \sfcode`;=3000
+{\tt
+IF(A>B)THEN;
+
+\qquad \_Do  I=1,N;
+
+\qquad \qquad  Y(I,J)=Y(I,J)+Y(I,J+1);
+
+\qquad \_od;
+
+ENDIF;}\par}
+- - - - - - - - - - - - - - - - - - - - - - - - -
+\vskip .2cm
+
+\par\noindent The semicolon may be omitted before and/or after the closing
+``{\bf \_od}'',
+so the next text is equivalent to the last one:
+\vskip .2cm
+- - - - - - - - - - - - - - - - - - - - - - - - -
+{\obeylines \sfcode`;=3000
+{\tt
+IF(A>B)THEN;
+
+\qquad \_Do  I=1,N;
+
+\qquad \qquad  Y(I,J)=Y(I,J)+Y(I,J+1)
+
+\qquad  \_od
+
+ENDIF;}\par}
+- - - - - - - - - - - - - - - - - - - - - - - - -
+\vskip .2cm
+
+\par\noindent Hereafter we use the {\bf \_Trefor} input format in
+our examples, as the
+most suitable for the design of complex codes.
+
+\chap{The tree structure of the program design}
+\vskip .5cm
+
+Here we give some definitions, but they are not quite formal,
+and the best way to understand the way of writing codes in
+Trefor is to read carefully our Example 2.1 and the printouts
+in the Appendix.
+
+DESIGN TREE
+
+\itemitem{::$=$} the sequence of a ROOT NODE and of its CHILD NODEs
+
+ROOT NODE
+
+\itemitem{::$=$} NODE TEXT
+
+CHILD NODE
+
+\itemitem{::$=$} NODE HEADLINE and the NODE TEXT. A node may have no children.
+            If the root node has no children, then the whole code is
+            presented in the form usual for standard languages, without
+            additional information on the code structure
+
+NODE TEXT
+
+\itemitem{::$=$} the sequence of TERMINAL TEXT segments and/or COMMENTS
+            and/or DESIGN REQUESTs and/or DEFINITIONS for macros and
+            aliases
+
+NODE HEADLINE
+
+\itemitem{::$=$} \%GLOBAL\_INDEX:
+            where ``\%'' is typed in the first column.
+            So the percent sign is reserved as an escape symbol
+            only here: in any other
+            position in the text you may use ``\%'' if you need it
+
+TERMINAL TEXT
+
+\itemitem{::$=$} text in the language you use,
+ALIASes and some RESERVED WORDs.
+In {\bf \_Fortran} and {\bf \_Trefor}
+input also the symbols given below
+with their Fortran equivalents
+
+\settabs 4 \columns
+\+ & $\neg$   &.NOT.& \cr
+\+ & \&       &.AND.& \cr
+\+ & !        &.OR. & \cr
+\+ & $==$     &.EQ. & \cr
+\+ & $\neg =$ &.NE. & \cr
+\+ & $<>$     &.NE. & \cr
+\+ & $>$      &.GT. & \cr
+\+ & $<$      &.LT. & \cr
+\+ & $>=$     &.GE. & \cr
+\+ & $\neg <$ &.GE. & \cr
+\+ & $<=$     &.LE. & \cr
+\+ & $\neg >$ &.LE. & \cr
+
+Of course, you may use any form (old or new) you wish
+
+for these logical and relation notations
+
+COMMENTS
+
+\itemitem{::$=$} `two minuses' and then the comment:
+            $--$ any text to the end of the line (as in Ada).
+            `Slash-asterisk' comment as in PL/1 or REXX:
+            /$*$ text $*$/
+
+\itemitem{$\,\,$} Here text may include many
+            lines with nodes, other comments
+            etc. This comment may be used several times within one
+            line. You may use other comments in the language you use.
+            E.g. in {\bf \_Fortran}
+            input (but not in {\bf \_Trefor}) you may use
+            ``C'' or ``$*$'' in the first column of the line.
+            The language
+            \_C ascribes some special meaning to ``$--$'',
+            so it may not be
+            used as a comment: the preprocessor will understand this
+            correctly if you type \_C at the beginning of the C section
+
+DESIGN REQUEST
+
+\itemitem{::$=$} $<*$LOCAL INDEX:  SPECIFICATION of the child node $*>$
+            If the ``:'' is omitted or replaced by another symbol,
+            then everything inside the `brackets'
+            ``$<*$'' and ``$*>$''
+            is understood as a comment.
+            If the closing ``$*>$'' is not met
+            until the next node headline
+            then the error diagnostics is issued
+
+LOCAL INDEX
+
+\itemitem{::$=$} sequence of alphanumeric characters. The local index
+            is ``short'' if it is only one letter or digit.
+            The local index is ``long'' if it contains more than one
+            character
+
+    SPECIFICATION
+
+\itemitem{::$=$} text of any length, not
+containing the combination ``$*>$''
+
+    GLOBAL\_INDEX
+
+\itemitem{::$=$} concatenation of local indices on the path to the node.
+            Two delimiters are used here:
+            the underscore ``\_'' shows that the next local index in the
+            concatenation is the long one (but of course everything
+            will be OK if it is in fact the short one);
+            the point ``.'' shows that the next local index is short
+            and all other characters appearing in the concatenation
+            are understood as short local indices even if they are
+            not separated by any delimiters until there again appears
+            ``\_''. This helps to write very long node headlines
+            in the huge complex codes using short local indexes.
+            The difference in their use is explained in examples
+            below
+\smallskip
+{\it Example 2.1}
+
+\par\noindent Here we want to solve a small problem: to find in SUM
+the sum of all products, containing M elements of an array X(1:N).
+
+\par\noindent The {\bf \_Trefor} input file for actually working code
+
+\baselineskip=12pt
+$***$ {\tt Top of File} $*************************************$
+{\obeylines \sfcode`;=3000
+{\tt
+\qquad--\$\$ ----------HERE BEGINS THE ROOT NODE-------------
+
+\qquad--\$\$ Throughout this text the comments with ``--\$\$''
+
+\qquad \qquad \qquad \qquad are just for
+
+\qquad--\$\$ HELP of Trefor. In actual design tree they are
+\qquad \qquad \qquad \qquad omitted without
+
+\qquad--\$\$ any loss of information on the algorithm
+
+\qquad--\$\$
+
+PROGRAM SCOMB;
+\qquad /$*$ On entry
+
+\qquad \quad X(1:N)- the array of N real elements
+
+\qquad \qquad M - integer >0
+
+\qquad On exit
+
+\qquad \qquad SUM is the sum of products of all combinations of M
+
+\qquad \qquad different elements of X
+
+\qquad $*$/ --\$\$ this is the comment of PL1/REXX type
+
+<$*$Var: variables description $*$>;
+
+\qquad--\$\$
+
+\qquad--\$\$ this is the request with local index ``Var''
+
+\qquad--\$\$
+
+<$*$Input: input N, M, and the values of X(1:N) $*$>;
+
+\qquad--\$\$
+
+\qquad--\$\$  this is the request with local index ``Input''
+
+\qquad--\$\$
+
+\qquad /$*$ abstract variable  SET - the ordered set of indexes K(I):
+
+\qquad \qquad K(1) < K(2) < ...< K(M)
+
+\qquad Statement QS:   SUM is the sum of products
+
+\qquad \qquad \qquad X(K(I)) for all $\{$ K(I)$\}$ == SET <=
+SET(CURRENT) $*$/
+
+\qquad <$*$1: make QS true for
+SET==SET(INITIAL) $*$>; --\$\$ local index 1
+
+\qquad \_While <$*$2:  SET $\neg$ = SET(FINAL) $*$> \_Do
+
+\qquad \qquad <$*$3: find next  SET  keeping QS invariant $*$>
+
+\qquad \_od; -- Here SET==SET(FINAL) and QS==. TRUE., that is
+
+\qquad \qquad \quad -- sum contains all needed products of X(K(I))
+
+\qquad WRITE(6,$*$)' N=',N,' \quad  M=',M,' \quad  SUM=', SUM;
+
+END;
+
+\qquad--\$\$ --------- THE END OF THE ROOT NODE ----------
+
+\%\_Input:
+
+\qquad--\$\$ the previous line is the headline of a child node, ``\_'' shows
+
+\qquad--\$\$ that alphanumeric sequence till the next ``\_'' or ``.''
+\qquad \qquad \qquad \qquad or ``:''
+
+\qquad--\$\$ is the one long local index
+
+\qquad--\$\$
+
+\qquad Write(0,*)'Enter the array length N';
+
+\qquad READ(5,*) N;
+
+\qquad Write(0,*)'Enter the number of elements in product M';
+
+\qquad READ(5,*) M;
+
+\qquad Write(0,*)'Enter the array X(1:N)';
+
+\qquad READ(5,*) (X(I),I=1,N);
+
+\%3:
+
+\qquad--\$\$  the previous line is the headline of another child node,
+\qquad \qquad \qquad \qquad the absence of
+
+\qquad--\$\$ ``\_'' or the presence of ``.'' tells that only one
+\qquad \qquad \qquad \qquad character is used
+
+\qquad--\$\$  as the local index, i.e. the local index is the short one.
+
+\qquad--\$\$  We begin the design from this node since at the moment it
+\qquad \qquad \qquad \qquad is
+
+\qquad--\$\$  not yet decided, what is the actual structure of the abstract
+
+\qquad--\$\$  variable SET, but we already can develop the algorithm
+
+\qquad--\$\$
+
+\qquad <$*$A: find new SET , i.e. new $\{$ K(I) $\}$ $*$>;
+
+\qquad <$*$B: put in PRODCT the product of X(K(I)) $*$>;
+
+\qquad SUM = SUM + PRODCT
+
+\%3A:
+
+\qquad--\$\$  the previous line is the headline of the node with
+\qquad \qquad \qquad \qquad local index ``A''
+
+\qquad--\$\$  requested in the node \%3, the global index here is
+\qquad \qquad \qquad \qquad ``3A'' which is
+
+\qquad--\$\$  equivalent to ``\_3\_A'', or to ``\_3.A'', or to ``.3.A'',
+\qquad \qquad \qquad \qquad or to ``3.A'',
+
+\qquad--\$\$  or to ``3\_A'', but not to ``\_3A'', since there is no
+\qquad \qquad \qquad \qquad request with
+
+\qquad--\$\$  the local index ``3A''
+
+\qquad--\$\$
+
+\qquad /$*$ concrete presentation of  SET:
+
+\qquad \qquad  K(I) - array of integer  M  elements $*$/
+
+\qquad I=M;
+
+\qquad \_While K(I)==N+I-M \_Do
+
+\qquad \qquad  I=I-1
+
+\qquad \_od;
+
+\qquad K(I)=K(I)+1;
+
+/$*$ The next loop is valid only for Fortran-77
+
+ \qquad since for  m==1  Fortran-66  executes Do-loop L=1,0 $*$/
+
+\qquad \_Do L=1, M-1;
+
+\qquad \quad  K(I+L)=K(I)+L
+
+\qquad \_od
+
+\%3B:
+
+\qquad PRODCT=1.D0;
+\qquad \_Do I=1,M;
+\qquad \quad PRODCT$=$PRODCT$*$X(K(I))
+\qquad \_od
+
+\%2:
+
+\qquad K(1) $\neg$= N+1-M
+
+\qquad-- If K(1)==N+1-M all the K(I) reach their final value
+
+\%1:
+
+\qquad SUM=1.D0; -- !!!
+
+\qquad \_Do I=1,M;
+
+\qquad  \quad K(I)=I;
+
+\qquad \quad SUM=SUM$*$X(I);
+
+\qquad  \_od
+
+\%\_Var:
+
+\qquad--\$\$ the design of any node may be done in any convenient place
+
+\qquad--\$\$ after the end of the requesting node, e.g. the description
+
+\qquad--\$\$ of variables may be done at the end of the design tree when
+
+\qquad--\$\$ you already know all the desired data structures
+
+\qquad--\$\$
+
+\qquad\quad Implicit real$*$8 (a-h,o-z);
+
+\quad \qquad Parameter(NDIM=10000); -- maximum dimension of arrays
+
+\quad \qquad Real$*$8 X(NDIM), SUM, PRODCT;
+
+\quad \qquad Integer K(NDIM),I,M,N,L; } \par}
+
+%\quad \qquad Parameter(PI=3.14159 26535 89793D0); } \par}
+
+$***$ {\tt End of File} $**************************************$
+
+\baselineskip=18pt
+
+\quad   If this file is scomb.trf and you type
+
+\quad   trf -nfl scomb.trf
+
+then you obtain the code scomb.f which may be submitted for translation
+to a Fortran compiler. Moreover you have a Trefor listing, scomb.lst,
+with detailed Trefor diagnostics.
+
+In the Appendix we give the printouts for scomb.trf (without our
+additional meta-comments), the listing, scomb.lst, and the resulting Fortran
+text scomb.f.
+% ========================================================================================================================
+%  LEVEL 4.1.0 ( Oct 1989)          VS Trefor           Date:18/06/90 Time:13:27:07   File compiled: SCOMBT   TREFOR   A1
+ %========================================================================================================================
+  %  1      --$$------------ HERE BEGINS THE ROOT NODE -----------------
+%    2      --$$ Throughout this text the comments with "--$$" are just for
+%    3      --$$ HELP of TREFOR. In actual design tree they are omitted without
+%    4      --$$ any loss of information on the algorithm
+%    5      --$$
+%    6    PROGRAM SCOMB;
+%    7      /* On entry
+%    8          X(1:N) - the array of N real elements
+%    9           M - integer > 0
+%   10         On exit
+%   11           SUM is the sum of products of all combinations of M
+%   12           different elements of X
+%   13         */  --$$ comment of PL/1 or REXX type
+%   14    <*Var: variables description *>;
+ %  15        --$$ this is the request with local index "Var"
+%   16        --$$
+%   17    <*Input: input N, M, and the values of X(1:N) *>;
+%   18        --$$ this is the request with local index "Input"
+%   19        --$$
+%   20      /* abstract variable  SET  - the ordered set of indexes K(I):
+%   21           K(1) < K(2) < ... < K(M)
+%   22         Statement QS:  SUM is the sum of products
+%   23                   X(K(I)) for all  { K(I) }==SET <= SET(CURRENT) */
+%   24      <*1: make  QS  true for  SET==SET(INITIAL) *>; --$$ local index 1
+%   25      _While <*2:  SET ^= SET(FINAL) *> _Do
+%   26         <*3: find next  SET  keeping QS invariant *>
+%   27      _od; -- Here  SET==SET(FINAL) and QS==.TRUE., that is
+%   28           -- sum contains all needed products of X(K(I))
+%   29      WRITE(6,*)' N=',N,'   M=',M,'   SUM=', SUM;
+%   30    END;
+%   31      --$$-------------- THE END OF THE ROOT NODE ------------------
+%   32 %_Input:------------------------------------------------------------------------    The node requested in line   17
+%   33      --$$ the previous line is the headline of a child node, "_" shows
+%   34      --$$ that alphanumeric sequence till the next "_" or "." or ":"
+%   35      --$$ is the one local index
+%   36      --$$
+%   37      READ(5,*) N,M;
+%   38      READ(5,*) (X(I),I=1,N);
+%   39 %3:-----------------------------------------------------------------------------    The node requested in line   26
+%   40      --$$ the previous line is the headline of another child node, the absence of
+%   41      --$$  "_" or the presence of "." tells that only one character is used
+%   42      --$$ as the local index, i.e. the local index is the short one.
+%   43      --$$ We begin the design from this node since at the moment it is
+%   44      --$$ not yet decided, what is the actual structure of the abstract
+%   45      --$$ variable SET, but we already can develop the algorithm
+%   46      --$$
+%   47       <*A: find new  SET , i.e. new { K(I) } *>;
+%   48       <*B: put in PRODCT the product of X(K(I)) *>;
+%   49       SUM = SUM + PRODCT
+%   50 %3A:----------------------------------------------------------------------------    The node requested in line   47
+%   51      --$$ the previous line is the headline of the node with local index "A"
+%   52      --$$ requested in the node %3, the global index here is "3A" which is
+%   53      --$$ equivalent to "_3_A", or to "_3.A", or to ".3.A", or to "3.A",
+%   54      --$$ or to "3_A", but not to "_3A", since there is no request with
+%   55      --$$ the local index "3A"
+%   56      --$$
+%   57       /* concrete presentation of  SET:
+%   58          K(I) - array of integer  M  elements */
+%   59       I=M;
+%   60       _While K(I)==N+I-M _Do
+%   61          I=I-1
+%   62       _od;
+%   63       K(I)=K(I)+1;
+%   64    /* The next loop is valid only for Fortran-77
+%   65       since for  m==1  Fortran-66  executes Do-loop L=1,0 */
+%   66       _Do L=1,M-1;
+%   67         K(I+L)=K(I)+L
+%   68       _od
+%   69 %3B:----------------------------------------------------------------------------    The node requested in line   48
+%   70       PRODCT=1.D0;
+%   71       _Do I=1,M;
+%   72         PRODCT=PRODCT*X(K(I))
+%   73       _od
+%   74 %2:-----------------------------------------------------------------------------    The node requested in line   25
+%   75       K(1) ^= N+1-M
+%   76       -- If K(1)==N+1-M all the K(I) reach their final value
+%   77 %1:-----------------------------------------------------------------------------    The node requested in line   24
+%   78       SUM=1.D0; -- !!!
+ %  79       _Do I=1,M;
+%   80          K(I)=I;
+%   81          SUM=SUM*X(I);
+%   82       _od
+%   83 %_Var:--------------------------------------------------------------------------    The node requested in line   14
+%   84      --$$ the design of any node may be done in any convenient place
+%   85      --$$ after the end of the requesting node, e.g. the description
+%   86      --$$ of variables may be done at the end of the design tree when
+%   87      --$$ you already know all the desired data structures
+%   88      --$$
+%   89       Implicit real*8 (a-h,o-z);
+%   90       Parameter(NDIM=10000); -- maximum dimension of arrays
+%   91       Real*8 X(NDIM), SUM, PRODCT;
+%   92       Integer K(NDIM),I,M,N,L;
+%   93       Parameter(PI=3.14159 26535 89793D0);
+% ========================================================================================================================
+% Number of Trees Compiled -  1        Total Trefor compiling time(msec) -          59      Total number of nodes -      8
+% Highest Condition code=     0        Total Length of compressed text(bytes):     462      Count for Local indexes:    15
+% (c) Copyright   Weinstein et al.  1983-2006                                    User: SEB      at  MPA__IBM
+% ========================================================================================================================
+%
+%
+\vskip .5cm
+\chap{RESERVED WORDs for general case}
+\vskip .5cm
+%  /'D','O','O','D','I','F','F','I','T','H',
+%   'E','N','E','L','S','E','W','H','I','L',
+%   'E','L','E','A','V','E','I','T','E','R',
+%   'A','T','E','O','F','R','E','P','E','A',
+ %  'T','U','N','T','I','L','O','T','H','E',
+ %  'R','C','A','S','E','S','E','L','E','C',
+%   'T','E','S','A','C','E','N','D','D','E',
+%   'F','I','N','E','L','A','B','E','L','D',
+%   'E','F','L','I','S','T','T','R','A','C',
+%   'E','O','U','T','C','O','M','P','R','O',
+%   'C','R','E','T','U','R','N','C','A','L',
+%   'L','I','N','C','L','U','D','E','I','N',
+%   'C','L','U','D','E','N','F','O','R','T',
+%   'R','A','N','T','R','E','F','O','R','P',
+%   'A','S','C','A','L','R','E','X','X','C',
+%   'O','N','P','R','I','N','T','O','F','F',
+%   'P','R','I','N','T','E','N','D','O','F',
+%   'T','R','E','E'/;
+%
+    All reserved words begin with the underscore sign ``\_''.
+    You may use upper, lower or
+mixed case typing them. The delimiter for a reserved
+word is any non-alphanumeric symbol
+(usually it is just a blank). Digits are ignored
+in reserved words and you may use them just for labeling,
+e.g.
+
+\qquad \_Fortran \qquad    \_FORTRAN77  \qquad  \_FoR66Tran
+
+\par\noindent produce quite the same effect: telling the
+preprocessor that the input
+will be in the Fortran format, and nothing more.
+
+   Now we collect the reserved words for general case.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\quad   Input/output format:
+
+\quad   {\bf \_Trefor} \qquad    (default)
+
+\quad   {\bf \_Fortran}
+
+\quad   {\bf \_REXX}
+
+\quad   {\bf \_Pascal}
+
+\quad   {\bf \_C}
+
+\par\noindent The file produced after the processing (command trf -[options]
+Fname) will be
+\vskip .2cm
+$\; \;$   Fname.f
+\vskip .2cm
+\par\noindent and you should change the extension .f to the language
+you are actually using if its not Fortran.
+
+You may use {\bf \_Pascal} format with many
+languages with similar syntaxes
+(actually {\bf \_REXX} and {\bf \_Pascal}
+formats are the same from the point of
+view of the Trefor).
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\vskip .2cm
+\quad   {\bf\_Include}  Fname;
+\vskip .2cm
+\par\noindent this is used to include other files written in the
+format declared.
+It is used to include the file
+\vskip .2cm
+$\; \;$    Fname.inc
+\vskip .2cm
+\par\noindent where the file  Fname.inc will be searched for in
+the alphabetical order on
+the accessed disks. The included file may contain other {\bf \_include}
+instructions.
+\vskip .2cm
+\quad  {\bf \_IncludeN}  Fname
+\vskip .2cm
+\par\noindent is equivalent to {\bf \_Include} but the
+contents of included files is not typed in the Trefor listing.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\quad   {\bf \_Offprint}
+
+\quad   {\bf \_Onprint}
+
+\par\noindent to switch off/on the output to the listing file.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\quad   {\bf \_Trace}
+
+\par\noindent This word will generate messages in the output
+file about leaving and entering the nodes. E.g.,
+
+\qquad \quad     '$-->$ Entering Node \% \_Var:'
+
+\qquad \quad     '$<--$ Leaving  Node \% \_Input:'
+
+\par\indent If you type in the example of file Scomb Trefor:
+
+\quad  {\bf \_trace} 'write(5,$*$)'
+
+\par\indent then you obtain in output the Fortran text:
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+{\tt
+\qquad \quad      PROGRAMSCOMB
+
+\qquad \quad      WRITE(5,$*$)'--> Entering Node \% \_Var:'
+
+\qquad \quad      IMPLICITREAL$*$8(A-H,O-Z)
+
+\qquad \quad      PARAMETER(NDIM=10000)
+
+\qquad \quad      REAL$*$8X(NDIM),SUM,PRODCT
+
+\qquad \quad      INTEGERK(NDIM),I,M,N,L
+
+\qquad \quad      PARAMETER(PI=3.141592653589793D0)
+
+\qquad \quad      WRITE(5,$*$)'<--Leaving  Node \% \_Var:'
+
+\qquad \quad      WRITE(5,$*$)'-->Entering Node \% \_Input:'
+
+\qquad \quad      Write(0,$*$)'Enter the array length N'
+
+\qquad \quad      READ(5,$*$)N
+
+\qquad \quad      Write(0,$*$)'Enter the number of elements in product M'
+
+\qquad \quad      READ(5,$*$)M
+
+\qquad \quad      Write(0,$*$)'Enter the array X(1:N)'
+
+\qquad \quad      READ(5,$*$)(X(I),I=1,N)
+
+\qquad \quad      WRITE(5,$*$)'<--Leaving  Node \% \_Input:'
+
+\qquad \quad       ... }
+
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\par\noindent So you may receive messages from executing
+program tracing the
+nodes. Of course, the first message about the
+node ``\% \_Var:'' does
+not allow to obtain correct Fortran code. To avoid this you just
+type ``O''in the node head:
+
+\% \_Var:O
+
+\par\noindent where ``O'' is from ``Offtrace''. In the example
+considered you should also type
+
+\%2:O
+
+\par\noindent Try not to do this and look to the output Fortran
+file after issuing the command ``trf -nf scomb.trf'' .
+
+\quad   You may also trace the nodes with some variables:
+
+\quad   {\bf \_trace} ``write(6,'('' X(1)$=$'',G12.3,A)')
+X(1),'';
+
+\par\noindent the message from trace will be always just added
+to your ``write...''.
+Note, that here you are forced to use quotation
+as outside delimiter
+since inside you use the apostrophe (cf. below the rules for
+alias definitions).
+
+To trace the nodes actively in other languages you have to
+use other appropriate
+instructions together with the {\bf \_trace}, e.g.
+in REXX:
+
+\quad  {\bf \_trace} 'SAY'
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\quad  {\bf \_Define}
+
+\quad  {\bf \_Deflist}
+
+\par\noindent The description of these is given below in Sect. 5.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\vskip .5 cm
+\chap{Structure constructions and reserved words}
+\titcon{for Fortran files in output}
+
+ The following constructions have sense ONLY for standard {\bf \_Trefor}
+or {\bf \_Fortran} input when preprocessor outputs Fortran .
+
+ We have already used in the examples above
+ {\bf \_Do}{\bf \_od} and
+{\bf \_While}{\bf \_Do}{\bf \_od} constructions.
+The best way to understand how any
+Trefor construction is transformed to the standard Fortran is
+to type an example, then to issue command
+
+\quad   trf
+
+\par\noindent and then to browse the created Fortran file.
+Here we do not give
+the detailed syntax but only some sketch and examples.
+
+\par\noindent SQUARE BRACKETS ``['', ``]'': they are used in the
+sense of BEGIN and
+END of Algol-60 (or Pascal), but only in fixed constructions.
+\smallskip
+{\it Example 4.1}
+
+The {\bf \_do} loop from example 1.3:
+
+{\obeylines \sfcode`;=3000
+{\tt
+
+ \_Do  I=1,N;
+
+\qquad    Y(I,J)=Y(I,J)+Y(I,J+1)
+
+ \_od } \par}
+
+\par\noindent is equivalent to the construction
+
+{\tt  \_Do  I=1,N [ Y(I,J)=Y(I,J)+Y(I,J+1) ] }
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\smallskip
+ Example 4.2
+
+\par\noindent Embedded {\bf \_do} loops (Nordsieck predictor in
+multi-step ODE-solvers):
+
+{\obeylines \sfcode`;=3000
+{\tt
+ \_Do J1=1,NQ;
+
+\qquad \_Do J2=J1,NQ;
+
+\qquad \quad  J=NQ-J2+J1;
+
+\qquad \quad \quad  \_Do I=1,N;
+
+\qquad \quad \quad \quad  Y(I,J)=Y(I,J)+Y(I,J+1)
+
+\_Od\_Od\_Od; } \par}
+
+\par\noindent or, equivalently:
+
+{\obeylines \sfcode`;=3000
+{\tt
+ \_Do J1=1,NQ;
+
+\qquad \_Do J2=J1,NQ;
+
+\qquad \quad J=NQ-J2+J1;
+
+\qquad \quad \quad  \_Do I=1,N;
+
+\qquad \quad \quad \quad  Y(I,J)=Y(I,J)+Y(I,J+1)
+
+\qquad \quad \quad  \_Od
+
+\qquad \_Od2
+
+ \_Od1; } \par}
+
+\par\noindent As we have already noted the numbers in reserved
+words have no effect on the output: actual
+  labels are produced by the preprocessor
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+
+\qquad A sketch of other constructions. We use the following
+abbreviations:
+
+\qquad log.expression \quad ::$=$ logical expression of Fortran/Trefor
+
+\qquad Op.sequence  \qquad ::$=$ sequences of Trefor operators
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad  {\bf \_While} log.expression {\bf \_do}
+
+ \qquad \qquad      Op.sequence
+
+\qquad   {\bf \_Od;}
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad  {\bf \_Repeat}
+
+\qquad \qquad   Op.sequence
+
+\qquad  {\bf \_Until} log.expression;
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad  {\bf \_Repeat}[
+
+\qquad \qquad   Op.sequence
+
+\qquad \qquad \qquad ];   \qquad   $--$ infinite loop
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad  {\bf \_While} log.expression1 {\bf \_do}
+
+\qquad \qquad  Op.sequence
+
+\qquad  {\bf \_Until} log.expression2;
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad {\bf \_If} log.expression {\bf \_then}
+
+\qquad \qquad  Op.sequence
+
+\qquad  {\bf \_Fi}  \qquad  $--$ needed at Langlvl$=$66 or to pass
+
+\hskip 5cm    $--$ control inside if-then-else-endif construction
+
+\hskip 5cm   $--$ at Langlvl$=$77
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad  {\bf \_If} log.expression {\bf \_then}
+
+\qquad \qquad Op.sequence1
+
+\qquad {\bf \_else}
+
+\qquad \qquad  Op.sequence2
+
+\qquad {\bf \_Fi}
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad {\bf \_Case} Int. {\bf \_Of} \qquad \quad
+$--$ here Int. is an integer expression
+
+\quad \qquad  \_ Op.sequence1  \qquad $--$ and underscore delimits
+
+\quad \qquad \_ Op.sequence2  \qquad $--$ the Op.sequences
+
+\quad \qquad \_ Op.sequence3
+
+\qquad \quad    .......
+
+\qquad \quad \_ Op.sequenceN
+
+\qquad {\bf \_esac}
+
+\par\noindent this is equivalent to
+
+\qquad  {\bf \_Case} Int. {\bf \_Of}
+
+\qquad \quad \_1 Op.sequence1
+
+\qquad \quad \_2 Op.sequence2
+
+\qquad \quad \_3 Op.sequence3
+
+\qquad \quad   .......
+
+\qquad \quad \_N Op.sequenceN
+
+\qquad {\bf \_esac}
+
+\par\noindent and executes like GOTO(lab1,lab2,...,labN),Int.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad {\bf \_Select}
+
+\qquad \quad \_1 log.expression1 [ Op.sequence1 ]
+
+\qquad \quad \_2 log.expression2 [ Op.sequence2 ]
+
+\qquad \quad \_3 log.expression3 [ Op.sequence3 ]
+
+\qquad \quad   ........
+
+\qquad \quad \_N log.expressionN [ Op.sequenceN ]
+
+\qquad {\bf \_End}
+
+
+\par\noindent the {\bf \_select} operator finds the first I which
+has log.expression$--$.TRUE. and then executes the Op.sequenceI .
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad {\bf \_Leave} I
+
+\par\noindent is used to exit \_do I=m1,m2,m3; .... \_od  loop.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad {\bf \_Leave} All
+
+\par\noindent exits all embedded \_do\_od loops
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad {\bf \_Iterate} I
+
+\par\noindent is used to iterate \_do I=m1,m2,m3; ....
+\_od  loop. i.e. does
+GOTO label of CONTINUE for corresponding loop.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+\qquad {\bf \_Iterate} All
+
+\par\noindent control passes to CONTINUE of the outermost loop.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+Sometimes you do not know if a logical expression can be readily
+inserted in {\bf \_While}, {\bf \_If} and {\bf \_Select}
+construction. E.g., in the Example 2.1 :
+
+{\obeylines
+
+\qquad {\bf \_While} $<*$2:  SET $\neg =$ SET(FINAL) $*>$ {\bf \_Do}
+
+\qquad \quad $<*$3: find next SET keeping QS invariant $*>$
+
+\qquad {\bf \_Od};\par}
+
+\par\noindent the variable SET is abstract and perhaps you need
+some additional
+arithmetics before you obtain the logical relation. If you need this
+then you may replace
+\vskip .1cm
+\qquad  log.expression
+\vskip .1cm
+\par\noindent by
+\vskip .1cm
+\qquad [Op.sequence] log.expression
+\vskip .1cm
+\par\noindent at the stage of designing the node and you do not
+need to bother about this at the stage of requesting the node.
+
+\qquad {\bf \_Outcom}
+
+\par\noindent Use this word to output comment to Fortran text.
+You may then meet some
+troubles if use Ada type comments in {\bf \_Fortran} input,
+so at present for {\bf \_Fortran} input it is better to use
+the old-fashioned
+``C'' or ``$*$'' in the first column, if you for some reason need the
+Fortran output with comments.
+
+  After {\bf \_Outcom} you may type
+
+\qquad {\bf \_trace} `- - - - - - - -'
+
+\par\noindent then you find in the output file the comments
+informing you on the current node headlines.
+
+%\par\noindent NB: in any case you will find in the columns 73--80
+%of the output the line number of corresponding node head in the input
+%(where {\bf \_include} lines are also accounted for). Those line numbers
+%are the same you have in Trefor Listing through the command
+%
+%\qquad  TRL
+%
+%- - - - - - - - - - - - - - - - - - - - - - - - - - - -
+\vskip .5cm
+\chap{DEFINITIONS,  macros and aliases}
+
+Here we reserve the symbol ``@'' as the escape one
+so it may be used in other sense
+only in character constants or in comments. If this symbol is already
+reserved by the compiler ( as in some version of Pascal ) then it
+should be changed to another one at the installation of Trefor.
+
+\qquad  Syntax:
+
+\qquad {\bf \_Define} @name1 `defining sequence1'
+
+\qquad \qquad @name2 ``defining sequence2''$--$ comments are allowed here
+
+\qquad \qquad @name3 defining\_sequence2\_with\_no\_blank
+\_'\_no\_``\_in\_one\_line
+
+\qquad \qquad ; $--$ this closes the \_define, may be omitted if the next
+
+\qquad \qquad $\;$ $--$ nonblank is not ``@''
+
+\par\noindent Here ``name'' is an alphanumeric sequence
+
+\par\noindent Use apostrophe if defining sequence contains quote sign.
+
+\par\noindent Use quote if defining sequence contains apostrophe.
+\vskip .1cm
+\par\noindent You produce a macro definition if the defining
+sequence contains
+other alias names, perhaps not yet defined. You may redefine them many
+times when you need it before use.
+\vskip .1cm
+\par\noindent NB: the {\bf \_Define} is visible only in the
+child nodes requested after it!
+So you may use alias names to protect some important variables from
+unauthorized use in parallel nodes.
+
+For {\bf \_Trefor} and {\bf \_Fortran} use also:
+
+\qquad {\bf \_Deflist} @name1,@name2,...,@nameN;
+
+\par\noindent then you obtain identifiers z00001, z00002 ....
+
+\qquad {\bf \_deflist} idef00 @name1,@name2,...
+
+\par\noindent using any 6-character identifier as a mask,
+       then in this example you obtain identifiers idef01, idef02 ....
+
+\qquad {\bf \_Label} @name1,@name2,@name3....
+
+\par\noindent automatically produces labels.
+
+
+\vskip 1.5cm
+\chap{Procedures}
+
+   To call a procedure use:
+
+\qquad {\bf \_call} @Name;
+\smallskip
+
+
+ The description of a procedure has the form:
+
+\qquad {\bf \_Proc} @Name;
+
+\qquad \quad /$*$ the body of the procedure $*$/
+
+\qquad {\bf \_return};
+
+The Name of a procedure must be an alias, i.e. it must begin with
+the ``at\_sign'' symbol '{\tt @}'.
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+       Example of a procedure name:
+
+         {\tt \_PROC @GET\_WORD};
+
+The body of a procedure may contain any constructions of Trefor
+including macros  and other procedures. To call this procedure use
+
+         {\tt \_call @GET\_WORD};
+
+The recursive calls are also allowed (but then one must avoid
+the appearance of infinite loops).
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+       Example of a procedure containing another procedure:
+
+
+{\tt       \_PROC @HEAP;   $--$ HeapSort
+
+           \_PROC @SIFT;
+
+             $<*$sift: $*>$;
+
+           \_RETURN;
+
+           L=N/2+1; R=N;
+
+           \_WHILE L$>$1 \_DO
+
+              L=L-1; \_CALL @SIFT;
+
+           \_OD;
+
+           \_WHILE R$>$1 \_DO
+
+              W=A(1); A(1)=A(R); A(R)=W;
+
+              R=R-1; \_CALL @SIFT;
+
+           \_OD;
+
+         \_RETURN; }
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+When calling a procedure one must obey all the rules of work
+with aliases.
+Using a special variable
+       {\tt @RET\_Name\_of\_PROCEDURE},
+which keeps the number of the procedure call, one can arrange
+recursive calls, save this variable in a
+       {\tt STACK} (an integer array). Similarly one can save
+variables changing inside a procedure and restore them before the
+return.
+
+       Example of a procedure with an argument:
+
+       {\tt    \_Proc @A; $--$ argument  i
+
+             Sarg(p)=i; Sret(p)=@Ret\_A; p=p+1; $--$ Store CALLER in STACK
+
+               $<*$A: body of procedure A which may contain
+
+                    recursive calls of A $*>$;
+
+             p=p-1; i=Sarg(p); @Ret\_A=Sret(p); $--$ Return to CALLER
+
+           \_Return;}
+
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+   The    PROCEDUREs may be used only with
+   the Fortran as the object language.
+
+   In the output file a procedure looks like:
+
+       {\tt LAB0  CONTINUE
+
+       \qquad /$*$ body of procedure $*$/
+
+       \qquad GOTO(LAB1,LAB2,...,LABN), I6R00K}
+
+The \_call @Name\_proc is transformed into Fortran sequence
+
+          \qquad .........
+
+         \qquad {\tt GOTO LAB0
+
+       LAB1  CONTINUE
+
+          \qquad .........
+
+          \qquad   GOTO LAB0
+
+       LAB2  CONTINUE
+
+          \qquad .........
+
+          \qquad GOTO LAB0
+
+       LABN  CONTINUE }
+
+Here {\tt LAB0} -- is the label of the procedure head
+       {\tt LAB1,LAB2,...,LABN} -- are the labels of return
+      to the instruction after {\tt \_call}
+       ( {\tt N} -- is the number of calls),
+       {\tt I6R00K} -- an integer variable controlling the return.
+
+\vskip 0.5 cm
+
+{\it Diagnostics for procedures}
+
+
+\item{1.}{\tt 'Procedure not found'} --
+
+The procedure is either not defined or is not visible from the
+current node. The severity code is 8 (a fatal error).
+
+       Example:
+
+      {\tt  Program QUQU;
+
+          $<*$var: $*>$;
+
+          $<*$A: $*>$;
+
+          $<*$B: $*>$;
+
+        Stop;END;
+
+        \%A:
+
+          \_Proc @Local;
+
+            $<*$body: $*>$;
+
+          \_Return;
+
+          $<*$Calc: $*>$;
+
+        \%B:
+
+          $<*$Preparation: $*>$;
+
+          \_Call @Local;}
+
+\qquad $--$ the procedure {\tt @Local} is not visible from the node {\tt \%B}
+
+To use the procedure {\tt @Local} one has to move its description
+from the node {\tt \%A} into the root of a program:
+
+        {\tt Program QUQU;
+
+        $<*$var: $*>$;
+
+          \_Proc @Local;
+
+            $<*$body: $*>$;
+
+          \_Return;
+
+          $<*$A: $*>$;
+
+          $<*$B: $*>$;
+
+        Stop;END;
+
+        \%A:
+
+          $<*$Calc: $*>$;
+
+        \%B:
+
+          $<*$Preparation: $*>$;
+
+          \_Call @Local;}
+
+\qquad $--$ now {\tt @Local} is visible from the node {\tt \%B}
+
+\vskip 0.5 cm
+
+\chap{Trefor Diagnostic Messages}
+
+\smallskip
+
+ {\tt IFAIL} -- diagnostics code.
+
+  {\tt IFAIL}=3  -- fatal error (severity 8)
+
+   {\tt IFAIL}=2  -- warning (severity 4)
+
+{\it List of messages for the
+   1st stage (the formation of the program tree)}
+
+  {\tt  1.'Error in service word  \qquad  ' \qquad      IFAIL=3
+
+    2.'Local index repeated  \qquad      '  \qquad     IFAIL=3
+
+    3.'The node  is not requested \qquad  ' \qquad      IFAIL=2
+
+    4.'The node requested in line \qquad   'XXXX
+
+    5.'Text ignored until the node end  \qquad   '
+
+    6.'Its  design begins in line  \qquad   'XXXX
+
+    7.'No design for node from line \qquad  'XXXX \quad  IFAIL=2
+
+    8.'Reference to nonexistent node \qquad ' \qquad   IFAIL=2
+
+    9.'Case or Select not opened.  \qquad   '\qquad   IFAIL=3
+
+   10.'Alias not identified   \qquad      '  \qquad      IFAIL=3
+
+   11.'Unrecognizable symbol in Fileid. \quad '  \qquad       IFAIL=3
+
+   12.'Unable to open include file. \qquad  ' \qquad       IFAIL=2
+
+   13.'Caution: TREFOR TRACE active! \qquad        '
+
+   14.'Caution: COMMENTS will be output! \quad  '
+
+   15.'Deflist basis is too short \qquad   '\qquad        IFAIL=3
+
+   16.'Forbidden alias definition \qquad  ' \qquad       IFAIL=3
+
+   17.'Current tree completed.   \qquad      '
+
+   18.'Include level exceeds max.level! \quad   '\qquad   IFAIL=3
+
+   19.'Print full listing forced. \qquad  '
+
+   20.'Warning:Unknown service word!!! \quad '\qquad   IFAIL=2
+
+   21.'Print full listing started. \qquad  '
+
+   22.'Node head already in line \qquad  'XXXX \quad  IFAIL=3
+
+   23.'Procedure not found \qquad       ' \qquad   IFAIL=3
+
+   24.'Char. constant not completed'
+
+   25.'Request or comment not closed'}
+
+ \bigskip
+{\it The 2nd stage (the formation of output text)}
+
+  {\tt   1.'Node head already in line' XXXX
+
+    2.'No design for the NODE requested in line:'XXXX
+
+      'Node number:'YYY' with local index:'AAAA
+
+    3.'In NODE beginning in line:'XXXX' not defined  ALIAS @'AAAA
+
+    4.'In NODE beginning in line:'XXXX' recursion in ALIAS @'AAAA}
+
+ \bigskip
+{\it The following line may be written as the comment in the output Fortran text)}
+
+{\tt    'CERROR('XXXX') Syntactical or Alias Error'}
+
+\vskip 1 cm
+\vfill\eject
+
+\chap{Installing and running Trefor under Unix}
+
+If you got somewhere the file ctrf.tar.gz
+then unzip and untar it, e.g.
+
+\qquad \qquad   tar --xzvf ctrf.tar.gz
+
+or if that does not work
+
+\qquad \qquad   gzip --d ctrf.tar.gz
+
+\qquad \qquad   tar --xvf ctrf.tar
+
+Now issue commands
+
+\qquad \qquad   make conf
+
+\qquad \qquad   make all
+
+\qquad \qquad   make clean
+
+When you are prompted type ``Y'' if it goes OK.
+
+Now you have 2 binary executables: trf* and trefor* --- put them
+to your local bin/ directory or work with Trefor in the same directory
+you have them currently.
+
+The execution of trf command is controlled by the .trfrc file. Read it
+carefully and edit it to connect trf execution with the default COMPILER
+(and compiler's options) and the default EDITOR that you wish to use.
+The trf command looks for .trfrc file in the current directory, and
+if it is not found there then in the system directories (/usr/local/lib
+etc.). If .trfrc is not found at all then internal default options
+are used.
+
+The Trefor
+options are explained there in .trfrc file, or you may type
+
+\qquad \qquad   trf
+
+and you will see the list of the options.
+
+E.g.,
+
+\qquad \qquad   trf --nf your\_code.trf
+
+(where --nf means No Fortran compilation)
+will not submit your code to the Fortran compiler (defined in .trfrc
+file).
+
+If you wish to submit your code to Fortran compilation, then type, e.g.,
+
+\qquad \qquad   trf -- --c --O --qarch=pwr2 your\_code.trf
+
+Here you do not define any Trefor options and
+`` --c --O '' etc. ---  they are your Fortran options.
+
+If you type
+
+\qquad \qquad   trf --e your\_code.trf
+
+then you open your\_code.trf file for editing with the EDITOR --- this
+happens only if a severe error occurred at the stage of Trefor preprocessing.
+
+All needed Trefor options are written in one group, e.g.,
+
+\qquad \qquad   trf --nfl your\_code.trf
+
+--- no fortran compilation and preservation of the Trefor listing
+(your\_code.lst) file.
+
+Use
+
+\qquad \qquad a2ps --p [--Pprinter] your\_code.lst
+
+command to printout Trefor listings.
+
+
+
+\end

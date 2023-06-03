@@ -1,0 +1,71 @@
+# This is a comment
+# In the next section the trf options are described, e.g.:
+# trf -nenfl *.trf 
+#      |      EDITOR (no edit)
+#        |    COMPILER (no fortran)
+#          |  DELLISTING (save listing)
+OPTION=TREFOR:.:.:ON:
+OPTION=EDITOR:e:ne:ON:
+OPTION=VIEWER:v:nv:ON:
+OPTION=COMPILER:f:nf:ON:
+OPTION=DELLISTING:nl:l:ON:
+OPTION=DELSOURCE:ns:s:ON:
+OPTION=MSG:.:.:ON:
+# Character preceding a trefor option
+OPTCHAR=-+
+# Which system command will be called by trf?
+# Last line for a given command will be valid
+TREFOR=trefor %t . 1
+EDITOR=vi %t
+EDITOR=emacs %t 
+EDITOR=joe %t
+VIEWER=more %l
+VIEWER=less %l
+COMPILER=f77 %p %f
+DELLISTING=rm %l
+DELSOURCE=rm %f
+MSG=echo there are ERRORS - compilation will STOP now!
+# what is %t %p %f in the command above? These letters are described below
+# %1 parameters from command line
+# %2 full file name 
+# create %n from %2 - name without an extension
+LETTER=n:%2%3%3%3%7:
+# create name with the extention .trf from %n
+LETTER=t:%n.trf:
+LETTER=f:%n.f:
+LETTER=l:%n.lst:
+LETTER=o:%n.o:
+# create %p - parameters ( for compatibility with previous versions )
+LETTER=p:%1:
+#
+#EDITOR=joe %n.l
+COMPILER= mf486 -ltl -n2 -n3 -OLM %p %f
+COMPILER= wfc386 -4 -3 -OX -FP3 -BM %p %f
+COMPILER= wfl386 -4 -3 -OD -FP3 %p %f
+COMPILER= mf386 -n2 -n3 -n %p %f
+COMPILER= mf486 -ltl -n2 -n3 -OLM %p %f
+COMPILER= fl /c /B1 f1l.exe %p %n.for
+COMPILER=f77 -Xlist %p %f
+# use your standard fortran options in the next line:
+COMPILER=g77 %p %f
+COMPILER=f77 %p %f
+#
+# In this (and last!) section process of execution is contolled by
+# RCGT num, RCEQ num, RCLT num, etc - in the conditional goto operator
+# if(ReturnCode>num) GOTO label
+# :NAME - label NAME
+# other names are the operators, described in the previous section 
+# (COMPILER, etc...)
+EXECUTION
+ TREFOR
+  RCGT 4 ERROR
+ COMPILER
+   RCLE 0 EXIT
+#  EDITOR 
+# TREFOR
+:ERROR
+ MSG
+ VIEWER
+:EXIT
+ DELLISTING
+ DELSOURCE 

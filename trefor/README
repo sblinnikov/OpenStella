@@ -1,0 +1,100 @@
+Installing and running Trefor under Unix/Linux
+
+If you got somewhere the file ctrf.tar.gz
+then ungzip and untar it, e.g.
+
+      gtar -xzvf ctrf.tar.gz
+
+or if that does not work
+
+      gzip -d ctrf.tar.gz
+
+      tar -xvf ctrf.tar
+
+Now issue commands
+
+      make conf
+
+      make all
+
+      make clean
+
+When you are prompted type ``Y'' if it goes OK.
+
+Instead of 
+
+     make all
+
+issue
+
+     make all95
+
+to get trefor95 which is more suitable for producing f90 and f95 compatible fortran
+files.    
+
+Now you have 2 binary executables: trf* and trefor* (and/or trefor95*) -- put them
+to your executable  path (e.g. /usr/local/bin, or  local $HOME/bin/
+directory) or work with Trefor in the same directory
+you have them currently. 
+
+The execution of trf command is controlled by the .trfrc file. Read it
+carefully and edit it to connect trf execution with the default COMPILER
+(and compiler's options) and the default EDITOR that you wish to use. 
+The trf command looks for .trfrc file in the current directory, and
+if it is not found there then in the system directories (/usr/local/lib
+etc.). If .trfrc is not found at all then internal default options
+are used. You should have last definition of TREFOR variable in .trfrc
+like
+
+TREFOR=trefor95 %t . 1 
+
+if you want to use trefor95 instead of the default trefor
+
+The Trefor
+options are explained there in .trfrc file, or you may type
+
+      trf
+
+and you will see the list of the options.
+
+E.g.,
+
+      trf -nf your\_code.trf
+
+(where -nf means No Fortran compilation) 
+will not submit your code to the Fortran compiler (defined in .trfrc
+file).
+
+If you wish to submit your code to Fortran compilation, then type, e.g.,
+
+      trf - -c -O -qarch=pwr2 your\_code.trf
+
+Here you do not define any Trefor options and
+`` -c -O '' etc. --  they are your Fortran options.
+
+If you type
+
+      trf -e your\_code.trf
+
+then you open your\_code.trf file for editing with the EDITOR -- this
+happens only if a severe error occured at the stage of Trefor preprocessing.
+
+All needed Trefor options are written in one group, e.g.,
+
+      trf -nfl your\_code.trf
+
+-- no fortran compilation and preservation of the Trefor listing 
+(your\_code.lst) file.
+
+Now copy
+  cp trefor/.trfrc ~/
+  sudo cp trefor.xml /usr/share/kde4/apps/katepart/syntax/trefor.xml
+and move:
+  sudo mv bin/trf bin/trefor bin/trefor95 /usr/local/bin/
+and you are done.
+
+Use, e.g. 
+
+    a2ps -p [-Pprinter] your\_code.lst
+
+command to printout Trefor listings.

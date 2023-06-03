@@ -1,0 +1,23 @@
+  program qq;
+--  _fortran
+--      USE PORTLIB;
+--  _trefor
+--    USE DFLIB;
+    USE MSFLIB;
+    _include zone;
+    LOGICAL(4) result;
+    INTEGER(4) I, errnum;
+    a=5.;
+    b=a**2;
+    c=1./(b-a**2); -- test ovfl
+    c=1./(b-a);
+    write(*,*)' a=',a,'   b=',b,'   c=',c;
+  --  result = SYSTEMQQ('copy c:\bin\fmath.dat
+    --                           c:\dat\fmath2.dat');
+
+    I = SYSTEM("fl32"//' '//"ovf.f90");
+    If (I .eq. -1) then;
+      errnum = ierrno( );
+      print *, 'Error ', errnum;
+    end if;
+  end;

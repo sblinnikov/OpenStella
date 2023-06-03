@@ -1,0 +1,67 @@
+_outcom;
+_trace '--------';
+    PROGRAM SCOMB;
+  /* On entry
+    X(1:N) - the array of N real elements
+    M - integer > 0
+         On exit
+           SUM is the sum of products of all combinations of M
+           different elements of X
+         */  
+    <*Var: variables description *>;
+    <*Input: input N, M, and the values of X(1:N) *>;
+      /* abstract variable  SET  - the ordered set of indexes K(I):
+           K(1) < K(2) < ... < K(M)
+         Statement QS:  SUM is the sum of products
+                   X(K(I)) for all  { K(I) }==SET <= SET(CURRENT) */
+      <*1: make  QS  true for  SET==SET(INITIAL) *>; 
+      _While <*2:  SET ^= SET(FINAL) *> _Do
+         <*3: find next  SET  keeping QS invariant *>
+      _od; -- Here  SET==SET(FINAL) and QS==.TRUE., that is
+           -- sum contains all needed products of X(K(I))
+      WRITE(0,*)' N=',N,'   M=',M,'   SUM=', SUM;
+    END;
+%_Input:
+      Write(0,*)'Enter the array length N';
+      READ(5,*) N;
+      Write(0,*)'Enter the number of elements in product M';
+      READ(5,*) M;
+      Write(0,*)'Enter the array X(1:N)';
+      READ(5,*) (X(I),I=1,N);
+%3:
+       <*A: find new  SET , i.e. new { K(I) } *>;
+       <*B: put in PRODCT the product of X(K(I)) *>;
+       SUM = SUM + PRODCT
+%3A:
+       /* concrete presentation of  SET:
+          K(I) - array of integer  M  elements */
+       I=M;
+       _While K(I)==N+I-M _Do
+          I=I-1
+       _od;
+       K(I)=K(I)+1;
+    /* The next loop is valid only for Fortran-77
+       since for  m==1  Fortran-66  executes Do-loop L=1,0 */
+       _Do L=1,M-1;
+         K(I+L)=K(I)+L
+       _od
+%3B:
+       PRODCT=1.D0;
+       _Do I=1,M;
+         PRODCT=PRODCT*X(K(I))
+       _od
+%2:o
+       K(1) ^= N+1-M
+       -- If K(1)==N+1-M all the K(I) reach their final value
+%1:
+       SUM=1.D0; -- !!!
+       _Do I=1,M;
+          K(I)=I;
+          SUM=SUM*X(I);
+       _od
+%_Var:
+       Implicit real*8 (a-h,o-z);
+       Parameter(NDIM=10000); -- maximum dimension of arrays
+       Real*8 X(NDIM), SUM, PRODCT;
+       Integer K(NDIM),I,M,N,L;
+

@@ -1,0 +1,6 @@
+_outcom
+ -- test >=
+
+   _if a>=b _then;
+     b=>cabsdf;
+   _fi

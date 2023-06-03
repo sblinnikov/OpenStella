@@ -1,0 +1,48 @@
+
+SYSTEM= -Dunix
+PERF=-DPOINTER
+CC=gcc
+# debug version
+#CCOPT= -D_DEBUG_TRF_
+CCOPT=
+ 
+.c.o:
+	$(CC) $(CCOPT) $(SYSTEM) $(PERF) -c  $*.c
+
+
+help:
+	@echo "Type:"
+	@echo " 'make conf'  for configuration"
+	@echo " 'make all'   for make all executables"
+	@echo " 'make clean' to delete all work files"
+all: trf trefor 
+
+trf:  trfu.c
+	$(CC) $(CCOPT) trfu.c -o trf
+
+
+trefor:  trefor.o pass1.o pass2.o dtcdia.o 
+	$(CC)  -o  trefor  trefor.o pass1.o pass2.o dtcdia.o
+
+
+pass1.o:      pass1.c trfgen.h trfcode.h chargen.h tree.h pass1dep.h align.h
+
+dtcdia.o:     dtcdia.c trfgen.h trfcode.h chargen.h
+
+pass2.o:      pass2.c trfgen.h trfcode.h chargen.h tree.h pass2dep.h align.h
+
+trefor.o:     trefor.c trfgen.h trfcode.h chargen.h tree.h align.h
+
+tun: tun.c trfcode.h trfgen.h
+	$(CC) $(CCOPT) $(SYSTEM) $(PERF) tun.c -o tun
+pass1dep.h : tun
+	tun
+pass2dep.h : tun
+	tun
+align.h : tun
+	tun
+clean:
+	rm -f trefor.o pass1.o pass2.o dtcdia.o tun.o core
+conf : tun
+	tun
+

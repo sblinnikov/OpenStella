@@ -1,0 +1,620 @@
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+%
+%   This is a collection of TEX-macros taken from the former  PHYZZL
+%   adjusted to work under TEX-version 1.0 .
+%
+%   Last changed on  January 27th, 1986    by   Ewald Mueller
+%
+%   Last changed on  February 25th, 1992    by   S.Blinnikov
+%
+%-----------------------------------------------------------------------
+%-----------------------------------------------------------------------
+%
+%
+% Load fonts with baselineskip 18pt   (default is 12pt)
+%
+%
+%-----------------------------------------------------------------------
+%   Additional fonts are loaded.  Notice that the fonts
+%      \sevenrm, \seveni, \sevensy  and  \sevenbf
+%   are preloaded in PLAINORG TEX
+%
+%   font ambc12 at 14.4treupt changed to ambx10 at 14.4truept on
+%   October 29th, 1985   E.Mueller
+%-----------------------------------------------------------------------
+%
+\font\twelverm = cmr10  at 12truept
+\font\ninerm   = cmr9
+%
+\font\twelvei  = cmmi10 at 12truept
+\font\ninei    = cmmi9
+%
+\font\twelvesy = cmsy10 at 12truept
+\font\ninesy   = cmsy9
+%
+\font\twelvebf = cmbx10 at 12truept
+\font\ninebf   = cmbx9
+%
+\font\twelvex  = cmex10 at 12truept
+\font\twelveit = cmti10 at 12truept
+\font\twelvesl = cmsl10 at 12truept
+\font\twelvett = cmtt10 at 12truept
+%
+%   A few more fonts are needed for special purposes
+%
+\font\bigbc = cmbx10  at 14.4truept    % Institut-logo for letters
+\font\caps  = cmcsc10 at 12.0truept    % names of authors and sections
+%
+%-----------------------------------------------------------------------
+%   Size-switching macro
+%-----------------------------------------------------------------------
+%
+\def\twelvepoint{   \def\rm{ \fam0 \twelverm }
+  \textfont0=\twelverm \scriptfont0=\ninerm  \scriptscriptfont0=\sevenrm
+  \textfont1=\twelvei  \scriptfont1=\ninei   \scriptscriptfont1=\seveni
+  \textfont2=\twelvesy \scriptfont2=\ninesy  \scriptscriptfont2=\sevensy
+  \textfont3=\twelvex  \scriptfont3=\twelvex \scriptscriptfont3=\twelvex
+  \textfont\itfam=\twelveit         \def\it{ \fam\itfam \twelveit }
+  \textfont\slfam=\twelvesl         \def\sl{ \fam\slfam \twelvesl }
+  \textfont\ttfam=\twelvett         \def\tt{ \fam\ttfam \twelvett }
+  \textfont\bffam=\twelvebf  \scriptfont\bffam=\ninebf
+  \scriptscriptfont\bffam=\sevenbf  \def\bf{ \fam\bffam \twelvebf }
+  \normalbaselineskip=18pt
+  \normalbaselines \rm   }
+%
+%\font\bmit=cmbxti10
+\font\tenmbit=cmbxti10 at 12truept
+
+\newfam\mbifam
+\textfont\mbifam=\tenmbit
+
+\def\bmit{\fam\mbifam\tenmbit}
+
+\def\vector#1{\bmit #1}
+%
+\def\getsto{\mathrel{\mathchoice {\vcenter{\offinterlineskip
+\halign{\hfil$\displaystyle##$\hfil\cr\gets\cr\to\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr
+\gets\cr\to\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr
+\gets\cr\to\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil\cr
+\gets\cr\to\cr}}}}}
+%
+\def\la{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr<\cr\noalign{\vskip1.5pt}\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr<\cr
+\noalign{\vskip1.0pt}\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr<\cr
+\noalign{\vskip0.5pt}\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil
+\cr<\cr\noalign{\vskip0.5pt}\sim\cr}}}}}
+%
+\def\ga{\mathrel{\mathchoice {\vcenter{\offinterlineskip\halign{\hfil
+$\displaystyle##$\hfil\cr>\cr\noalign{\vskip1.5pt}\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\textstyle##$\hfil\cr>\cr
+\noalign{\vskip1.0pt}\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptstyle##$\hfil\cr>\cr
+\noalign{\vskip0.5pt}\sim\cr}}}
+{\vcenter{\offinterlineskip\halign{\hfil$\scriptscriptstyle##$\hfil
+\cr>\cr\noalign{\vskip0.5pt}\sim\cr}}}}}                               %
+% Select actual type-setting size and redefine the makefootline-macro
+%    (Defaults are:  \tenpoint    and   \baselineskip=24pt)
+%
+\twelvepoint
+\def\makefootline{\baselineskip=36pt \line{\the\footline}}
+%
+% To get a title page without page number the macro  \nopagenumbers
+% is used. Then \pageno is reset such, that the paper will start
+% with page number 1 on the SUMMARY page (see the \summary macro below)
+%
+\nopagenumbers
+%
+% This initializes a set of counters for numbering purposes.
+%
+\newcount\chapnum
+\chapnum = 0
+\newcount\secnum
+\secnum = 0
+\newcount\subsecnum
+\subsecnum = 0
+\newcount\numeq
+\numeq = 0
+%
+% Here we set and define some fundamental spacing parameters
+%
+\hsize    5.9in                      % default  6.5in
+\vsize    8.9in                      % default  8.9in
+\hoffset  0.4in
+\voffset  0.0in
+\parskip  5pt plus 1pt               % default  3pt plus 1pt minus .5pt
+%
+\def\chskipt{\vskip 20pt plus 0pt minus 0pt }
+\def\chskipl{\vskip 5.5pt plus 0pt minus 0pt}
+\def\secskipt{\vskip 6pt plus 2pt minus 1pt }
+\def\secskipl{\vskip 3.5pt plus 1pt }
+\def\subsecskip{\vskip 6pt plus 2pt minus 2pt }
+\def\unchskip{\vskip -5.5pt }
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+%
+% TITLE PAGE MACROS
+%
+% \pubdate{January 1983)     to get    January 1983
+%                            placed in top right hand corner of
+%                            title page
+%
+% \title{title of            The title will be centered and typed
+%        paper\*}            in boldface type.  If the title is
+%                            is longer than one line, use \title
+%                            again.  \* will give you a superscript
+%                            * following the title.
+%
+% \author{name}              The author's name will be centered
+%
+% \authort{name}             The names of two authors will be centered
+%                            i.e  A.ONE and B.TWO
+%                            with MPA's name and address below.
+%
+% \nextauthor{name}          To be used if you have more than
+%                            one author - the name is centered.
+%
+% \institut{name}{address}{country}
+% \institutb{name}{address}
+% \institutc{name}{address}
+%                            Institute name and address will be
+%                            centered below the next author's
+%                            name.  However, the } at the end of
+%                            name and the { at the beginning of
+%                            address must by on the same line with
+%                            no space between them.  For example,
+%                            "\institut{MPA}{Garching etc.}"
+%
+% \summary                   The word SUMMARY will be written left
+%                            adjusted in boldface.
+%
+% \keywd{keywords}
+%
+% \submit{journal name}      to get   "Submitted to {journal name}"
+%
+% \aasec{section name}       according to A&A nomenclature
+%
+% \stitle{short title}       short title for A&A
+%
+% \thesaurus{numbers}        thesaurus number of A&A
+%
+% \offpri{name}
+%
+% \endpage                   same as \par \vfill \eject
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+\def\ctrline{\centerline}
+%
+\def\pubdate#1{\line{\hskip 12cm {#1}\hfill} \par \vfill}
+%
+\def\title#1{\ctrline {\bf #1} \medskip }
+%
+\def\author#1{  \ctrline{ \caps {#1} } }
+%
+\def\authort#1#2{  \ctrline{ {\caps {#1} \ and \ {#2}} }  \smallskip
+    \ctrline{  \it {Max-Planck-Institut f\"ur Astrophysik} }
+    \ctrline{ \it {Karl-Schwarzschild-Str. 1}                        }
+    \ctrline{ \it {8046 Garching b. M\"unchen, FRG}                } }
+%
+\def\authora#1#2#3{ \ctrline{{\caps {#1} \ , \ {#2} \ , \ {#3} \ , \ }}}
+%
+\def\authorb#1{ \ctrline{\caps {#1} }
+    \smallskip
+    \ctrline{ $^2$ \it {Max-Planck-Institut f\"ur Astrophysik} }
+    \ctrline{ \it {Karl-Schwarzschild-Str. 1}                        }
+    \ctrline{ \it {D-8046 Garching b. M\"unchen, FRG}                } }
+%
+\def\nextauthor#1{ \smallskip
+                   \ctrline{and} \par \ctrline {\caps {#1}} }
+%
+\def\institut#1#2#3{ \ctrline{\it #1} \ctrline{\it #2}
+                     \ctrline{\it #3} \par \vfill }
+\def\institutb#1#2{ \ctrline{$^1$ \it #1} \ctrline{\it #2} \par }
+\def\institutc#1#2{ \ctrline{$^3$ \it #1} \ctrline{\it #2} \par }
+%
+% Because the macro \nopagenumbers was used above, we have to
+% reset \footline and \pageno  on the second page to give it the
+% page number 1. In addition the default \tenrm for the font of
+% the page number is changed to \twelverm .
+%
+\def\summary{ \footline={\hss\twelverm\folio\hss} \pageno=1
+              \line{\bf Abstract \hfill} \chskipl }
+%
+\def\submit#1{ \ctrline{Submitted to #1} }
+%
+\def\aasec#1{ \ctrline{Section: #1} }
+%
+\def\stitle#1{ \ctrline{Short title: #1} }
+%
+\def\thesaurus#1{ \ctrline{Thesaurus code numbers: #1} }
+%
+\def\offpri#1{ \par \vfill \ctrline{Send proofs and offprint
+                                    requests to: #1} \vfill }
+%
+\def\keywd#1{ \line{ {\bf Key words:} #1\hfill } \vfill }
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+%
+% CHAPTER and SECTION MACRO
+%
+% \chap{chapter name}        This command numbers the chapter,
+%                            generates part of the number to be
+%                            used in defining equation numbers,
+%                            left adjusts the line and prints it in
+%                            boldface type.  The lack of space
+%                            between \chap and { } is important.
+%
+% \titcon{text}              used to continue a chapter title to a
+%                            second line if you cannot fit it all on
+%                            one line.
+%
+% \sec{name}                 The \sec macro sets the name in upper
+%                            and lower case capitals, prints the
+%                            section name and number (left adjusted)
+%                            and skips the appropriate amount of space.
+%
+% \subsec{name}              The \subsec macro allows you to title
+%                            subsections with an underlined phrase
+%                            which will be set on the same line as
+%                            the first sentence of the first para-
+%                            graph of the subsection.
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+%\def\chpreset{ \global \secnum=0     \global \numeq=0 }
+% -- this is for numeration of eqs. starting anew in every chapter
+\def\chpreset{ \global \secnum=0 }
+% -- this is for continuos numeration of eqs.
+\def\secreset{ \global \subsecnum=0 }
+%
+\def\chap#1{ \global \advance\chapnum by 1  \chpreset \chskipt
+             \line{\bf \the\chapnum . #1\hfill}
+             \penalty 100000 \chskipl \penalty 100000 }
+%
+\def\titcon#1{ \unchskip \line{\bf{#1} \hfill}
+               \penalty 100000 \chskipl \penalty 100000 }
+%
+\def\sec#1{ \global \advance\secnum by 1  \secreset \secskipt
+    \line{\bf \the\chapnum .\the\secnum{ }{ }#1\hfill}
+             \penalty 100000  }
+%
+\def\subsec#1{ \global \advance\subsecnum by 1  \secskipt
+    \line{\bf \the\chapnum .\the\secnum .\the\subsecnum{ }{ }#1\hfill}
+             \penalty 100000  }
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+%
+% EQUATION NUMBER MACRO
+%
+% \eqno (any number)         In display math mode, i.e. between
+%                            $$...$$, you can use \eqno (any
+%                            number), i.e.
+%                            "$$...equation... \eqno (43)$$"
+%                            gives you (43) on the right hand
+%                            side of the page next to the equation.
+%
+% \eqno{\eqmm}               You can use \eqno{\eqmm} in display
+%                            math mode to number the equations
+%                            sequentially.  The number will appear
+%                            on the right hand side of the page.
+%                            TEX automatically numbers the equations
+%                            for you. Use
+%                            "$$ ...equation...\eqno{\eqmm} $$".
+%                            {\eqmm} is a synonym for {\enum}.
+%
+% \labeq{\name}              In display math mode, if you wish to
+%                            generate a dummy name for an equation,
+%                            use \labeq{\name} as the argument.  From
+%                            that point on \name will always be
+%                            associated with that particular equation,
+%                            and when \name is typed TEX will convert
+%                            it to the appropriate number.
+%
+%                            The virtue of the dummy name is that if
+%                            equations are added at a later time,
+%                            named equations or equations numbered
+%                            using \eqno{\eqmm} will be automatically
+%                            correctly renumbered.  If \name is used
+%                            then all textual references to that
+%                            equation will also be renumbered.
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+\newread\flabs
+\ifcase\giveeqname
+  \openout\flabs=flabs
+\or
+  \openin\flabs=flabs
+\fi
+%
+\def\finlabs{
+\ifcase\giveeqname
+  \closeout\flabs
+\or
+  \closein\flabs
+\fi
+  }
+%
+%\def\eqname#1{ \global \advance\numeq by 1
+%  \xdef#1{(\the\chapnum .\the\numeq )} (\the\chapnum .\the\numeq ) }
+%\ifcase\giveeqname
+  \def\eqname#1{ \global \advance\numeq by 1
+   \xdef#1{(\the\numeq )} (\the\numeq ) }
+%\or
+%  \def\eqname#1{ \global \advance\numeq by 1
+%    \xdef#1{(\the\numeq )}<{\bf#1}>(\the\numeq ) }
+%\fi
+%
+%\def\enum{ \global \advance\numeq by 1 (\the\chapnum .\the\numeq ) }
+\def\enum{ \global \advance\numeq by 1 (\the\numeq ) }
+%
+\def\eqmm{ \enum }
+%
+\def\refeq#1{ \xdef#1{(\the\numeq)}  }
+%#1
+%\#1        \grmm  \polsa             }
+%
+%\def\dumbs{ ^^ }
+%
+\ifcase\giveeqname
+  \def\labeq#1{
+  \write\flabs{\noexpand#1}
+  \eqno \eqname{#1}
+  }
+\or
+%  \def\labeq#1{ \eqno <{\bf#1}>\eqname{\#1} }
+ \def\labeq#1{
+   \global \advance\numeq by 1
+   \refeq{#1}
+   \global\read\flabs to\labl
+   \eqno<{\bf \labl}>(\the\numeq)
+                  } %  end of @def@labeq
+\fi
+%
+%  {\catcode`\@=0
+%   @catcode`@\=10
+%   @def@labeq#1{
+%    @global @advance@numeq by 1
+%    @refeq{#1}
+%    @global@read@flabs to@labl
+%    <{@bf @labl}>
+%    @eqno(@the@numeq)
+%                   } %  end of @def@labeq
+%    }  % end of catcod
+%  {
+%    \catcode`\@=0
+%    @catcode`@\=10
+%    @def@a{bbbbbbb}   @a   }
+% {\rm
+% \catcode`^^M=2
+% \catcode`\/=0
+%  \gdef\subl{\noexpand#1}
+% /global/read/flabs to/labl
+% \global\read\flabs to\labl
+% /labl
+% }
+% \eqno<{\bf \labl}>(\the\numeq)
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+%
+% BULLET, STAR AND DASH ITEM
+%
+% This is similar to the Point List Macro except that you
+% get a bullet, a star or a dash instead of a number.
+%
+% \bullitem text             Type the text beginning on the same line
+%                            (with a space between \bullitem and
+%                            whatever follows).  You can also begin
+%                            the text on the following line.
+%                            The text will be indented, preceded by
+%                            a bullet.  To end the text, type \endlist.
+%                            You can type \par or leave a blank line
+%                            and get the same result.
+%
+% \staritem text             The same as \bullitem above.
+% \dashitem text             The same as \bullitem above.
+%
+% \sbullitem text            This command will give you a sub-bullitem.
+% \sstaritem text            You will get a sub-staritem.
+% \sdashitem text            You will get a sub-dashitem.
+%
+% \ssbullitem text           You get sub-sub-bullitem.
+% \ssstaritem text           You get sub-sub-staritem.
+% \ssdashitem text           You get sub-sub-dashitem.
+%
+% \endlist                   Ends the list.
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+\def\point{   \par
+              \hangindent\parindent  \textindent  }
+%
+\def\spoint{  \par \indent
+              \hangindent2\parindent \textindent  }
+%
+\def\sspoint{ \par \indent \indent
+              \hangindent3\parindent \textindent  }
+%
+\def\bullitem{   \point{$\bullet $}}
+\def\staritem{   \point{$\ast $}}
+\def\dashitem{   \point{---}}
+\def\sbullitem{  \spoint{$\bullet $}}
+\def\sstaritem{  \spoint{$\ast $}}
+\def\sdashitem{  \spoint{---}}
+\def\ssbullitem{ \sspoint{ $\bullet $}}
+\def\ssstaritem{ \sspoint{ $\ast $ }}
+\def\ssdashitem{ \sspoint{ ---}}
+\def\endlist{\par}
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+%
+% USEFUL COMMANDS
+%
+% \app{App}                  gives you APPENDIX A, centered and typed
+%                            in boldface type.
+%
+% \ack                       ACKNOWLEDGMENTS will be centered and
+%                            typed in boldface type.
+%
+% \endpage                   same as \par \vfill \eject
+%
+% \ket{\symbol}              gives you "| symbol >"
+% \bra{\symbol}              gives you "< symbol |"
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+\def\app#1{  \chskipt \line{\bf Appendix #1\hfill }\penalty 10000
+             \chskipl \penalty 10000  }
+%
+\def\ack{  \chskipt \line{\bf Acknowledgements \hfill }\penalty 10000
+           \chskipl \penalty 10000  }
+%
+\def\ket#1{\leftv #1\rangle}
+\def\bra#1{\langle #1\rightv}
+%
+\def\endpage{\par \vfill \eject}
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+%
+% START MACROS
+%
+% If you wish to start printing a file in the middle and want the
+% page numbers to come out correctly start your input file with
+% \startpage{arabic number}
+%
+% \startpage{number}         The page count will start with the
+%                            given number.
+%
+% \startchapter{number}      The paper will be printed starting with
+%                            the given chapter number.
+%
+%
+% * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+%
+\def\startpage#1{\count0 = #1}
+\def\startchapter#1{\count\chapnum = #1}
+% Um ein Symbol ueber ein anderes zu setzen:
+%        \ueber{Grundsymbol}{Daruebergestelltes}
+% Gedacht fuer die Verwendung in Formeln. Das Daruebergestellte wird
+% in ganz kleiner Schrift gedruckt (\scriptscriptstyle).
+%
+\def\ueber#1#2{{\setbox0=\hbox{$#1$}%
+  \setbox1=\hbox to\wd0{\hss$\scriptscriptstyle #2$\hss}%
+  \offinterlineskip
+  \vbox{\box1\box0}}{}}
+\hsize 6.0in
+\vsize 9.5in
+\hoffset  0.10in
+\voffset -0.0in
+\vskip 1.0in
+\baselineskip=18pt
+
+
+\font\klein=cmr7
+\font\mittel=cmr10
+\font\normal=cmr10
+\font\mathnormal=cmmi10
+\font\mathklein=cmmi5
+\font\mathmit=cmmi10
+\font\kleinind=cmr5
+\font\midind=cmmi10
+\overfullrule=0pt
+{\catcode`\@=11
+\gdef\SchlangeUnter#1#2{\lower2pt\vbox{\baselineskip 0pt \lineskip0pt
+  \ialign{$\m@th#1\hfil##\hfil$\crcr#2\crcr\sim\crcr}}}
+  % kopiert von \@vereq aus dem TeXbook, Seite 360.
+}
+\def\gtrsim{\mathrel{\mathpalette\SchlangeUnter>}}
+\def\lesssim{\mathrel{\mathpalette\SchlangeUnter<}}
+\parskip=5pt
+\def\ref#1{\lbrack #1\rbrack}
+\def\eck#1{\left\lbrack #1 \right\rbrack}
+\def\rund#1{\left( #1 \right)}
+\def\ave#1{\langle #1 \rangle}
+\def\wave#1{\left\lbrace #1 \right\rbrace}
+\def\ueber#1#2{{\setbox0=\hbox{$#1$}%
+  \setbox1=\hbox to\wd0{\hss$\scriptscriptstyle #2$\hss}%
+  \offinterlineskip
+\def\underline{\underline}
+\def\x{x = x^{(m)}}
+\def\ax{\underline{x} = \underline{x}^{(m-1)}}
+\vbox{\box1\kern0.4mm\box0}}{}}
+\def\ref#1{\lbrack #1\rbrack}
+\def\eck#1{\left\lbrack #1 \right\rbrack}
+\def\rund#1{\left( #1 \right)}
+\def\ave#1{\langle #1 \rangle}
+\def\wave#1{\left\lbrace #1 \right\rbrace}
+\def\ueber#1#2{{\setbox0=\hbox{$#1$}%
+  \setbox1=\hbox to\wd0{\hss$\scriptscriptstyle #2$\hss}%
+  \offinterlineskip
+  \vbox{\box1\kern0.4mm\box0}}{}}
+\parindent=12pt
+\overfullrule=0pt
+%
+ \def\etal{{et al.} \thinspace}
+ \def\eg{{e.g.,} \thinspace}
+ \def\ie{{i.e.,} \thinspace}
+ \catcode`\@=11
+%
+ \def\ni{$^{56}{\rm Ni}\ $}      %Ni56 symbol
+ \def\co{$^{56}{\rm Co}\ $}      %Co56 symbol
+ \def\fe{$^{56}{\rm Fe}\ $}      %Fe56 symbol
+%
+ \def\kelvin{\thinspace\rm{\sp{o}{\kern-.08333em }K}\ }
+                                 %degrees Kelvin symbol (math mode)
+%-----------------------------------------------------------------------
+%
+% \def\ms#1{$#1$~M$_\odot$}
+ \def\ms{\,\, {M_{\odot}}}
+% \def\rs#1{$#1$~R$_\odot$}
+ \def\rs{\,\, {R_{\odot}}}
+ \def\mag#1#2{$#1^{m}\!\!\!.\,#2$}
+%
+%
+%
+\def\unvskip{%
+   \ifvmode
+      \ifdim\lastskip=0pt
+      \else
+         \vskip-\lastskip
+      \fi
+   \fi}
+\newskip\tabefore \tabefore=20dd plus 10pt minus 5pt      % space above
+\newskip\taafter  \taafter=10dd                           % space below
+%
+\def\begref#1{\par
+   \unvskip
+   \goodbreak\vskip\tabefore
+   {\noindent\bf\ignorespaces#1%
+   \par\vskip\taafter}\nobreak\let\INS=N}
+\parindent=1.5em
+\newdimen\stdparindent\stdparindent\parindent
+\def\ref{\if N\INS\let\INS=Y\else\goodbreak\fi
+   \hangindent\stdparindent\hangafter=1\noindent\ignorespaces}
+\def\endref{\goodbreak}
+%
+
