@@ -1,0 +1,1236 @@
+0. To begin with, read README.
+
+README tells you what to do to get the first realistic light curves in
+a couple of minutes for a weak type Ia supernova (type II's take
+longer time due to shock breakout, but also no problem).
+
+argmodel.sh  m030307mhomo
+will do the job (this is for ifort, use argmodelGF.sh for gfortran)
+
+Copy src/opacityHomo.inc to src/opacity.inc before running the script!
+
+When the script asks you about zone*.inc just select the last option to quit
+and the needed zone.inc with correct number of radial mesh points will
+be made of zoneSample  by the script.
+
+Again select the option to quit when asked about opacity.inc. If you
+will not prepare src/opacity.inc from src/opacityHomo.inc then the
+script will think that model is not homogeneous, and computation of
+opacity tables will take like an hour.
+
+The initial model in Stella binary format (*.mod with *.xni for 56Ni)
+and *.rho ASCII file, then opacity tables in vladsf/, then light curve
+and spectrum are computed in turn. The results are in res/: tt for
+UBVRI and Mbol with gamma-depostion, lbol file, ph for multigroup
+spectrum and swd for hydro profiles at preselected moments. If you
+have supermongo, run
+
+macro read snias.sm
+2ubvi m030307mhomo m030307mhomo
+
+to enjoy UBV light curves, the 2nd argument is for another model when
+you compute it.
+
+Do not care about trefor -- the preprocessor will be built by the
+script in a tiny fraction of a second and put into local stellam/bin
+directory. You may move all tr* files from there to your
+/usr/local/bin for later work independent of the script.
+
+In a smaller fraction of a second all needed *.trf files are transformed
+to *.f by makefiles.
+
+If you hate to read trf files, later you may work with all those
+generated *.f files.
+They are not elegantly profiled because for me they are like
+assembler, real source is written in trefor mainly. Please note that
+the code was developed originally more than 3 decades ago. It was time
+when we had fortran-IV without
+ifthenelse statements! So, fortran you get from trf is not f90
+(although we add more and more features from modern fortran, like
+modules).
+
+Similar situation is with the open-source EGSnrc developed  around the
+same time with their MORTRAN preprocessor. Still it can be used
+without any problem now, since Mortran is embedded in the package like
+our Trefor in Stella.
+
+Use _trace and _outcom statements in trf files for better reading fortran source
+when you need to debug (normally one does not need to read fortran)
+
+E.g. in stradio.trf there is the 1st line
+
+_trace "write(*,*)' ------',"
+
+So during the run one can see on the screen when the code enters various nodes, e.g.:
+
+-->Entering Node %_readmodel:
+
+<--Leaving  Node %_readmodel:
+
+To switch this off, comment out the 1st line in stradio.trf, i.e. put two minuses:
+
+-- _trace "write(*,*)' ------',"
+
+
+If you have just
+
+_trace ' ------'
+
+without "write" statement it is useful for debugging. After
+
+trf -nfs stradio.trf
+
+you will have stradio.f with the lines telling you the correspondence with
+the nodes in trf source.
+
+trf -s -c [other fortran options] stradio.trf
+
+will produce stradio.o if .trfrc in your $HOME directory has the last
+entry of COMPILER as your current fortran compiler.
+
+
+_outcom
+
+will transform trefor comments into fortran ones.
+
+
+
+*Note on OPEN for various files*
+
+Unfortunately, due to historical reasons the needed files are opened in different places in the code.
+
+Look into the nodes
+
+%_openfiles:
+
+and
+
+%_openfiles_filenames:
+
+in the main routine
+PROGRAM STELLA
+(see, e.g., in one of the standard main files stradsep5tt.trf).
+Some files are opened there via calls to stradio.
+
+Opacity files are opened in SUBROUTINE BEGIN, e.g., begradsep.trf.
+
+The file RUNNAME.tt is open in a tricky way in the code tt4strad.trf.
+It uses the Rfile as for RUNNAME.res read from strad.1
+with the same alias @wres (usually just unit 4), but renames it RUNNAME.tt
+in the node %_openfiles_filenames of the routine tt4strad.trf.
+
+
+How long will it take to get a light curve?
+
+An exceptional model like m030307m from the set of toy models from our
+paper with Woosley, Kasen and Elena Sorokina  (2006, comparison of STELLA and
+SEDONA) takes only a minute. Typical type II's from 10 minutes to a
+couple of hours. Hard models like SN06gy may run a week (as well as
+some toy models of the same set as m030307m -- for obscure reasons,
+but this is a predictor-corrector code, and it lives its own life in a
+run).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+_________________________________________________________________________
+
+Below we describe randomly what to do when running STELLA not using the scripts
+described above.
+1. Preparations
+
+To run STELLA one needs directories
+
+  lnag      - keeps local routines from an old NAG library
+-- now in lib/LNAG
+  sparse    - keeps an independent sparse matrix solver
+-- now in lib/sparse
+  src       - general source files
+  opacity   - opacity tables and dir now called
+  vladsf    - Ron Eastman's expansion opacity partly built by Vlad Popolitov
+  modmake   - preSN models (sometime dir woo is used separately)
+  eve       - eve of the run i.e. initial models
+  strad     - STELLA with radiative transfer - main codes
+
+object and make files are normally kept in the directory like
+
+  obj
+
+but this is not true for vladsf (opacity) directory: *.o files stay there.
+
+Preparations start in the directory modmake/ for Nomoto and N.Tominaga models (and for many others),
+and maybe in woo/ for Woosley's (KEPLER code) models.
+
+Standard input of evolutionary models is done via *.hyd and *.abn files.
+
+One has to prepare two files *.hyd and *.abn in free formats, as described below.
+
+The 1st line in hyd file has
+
+timeStart, -- in seconds (time from core collapse/explosion)
+Nzon, -- the number of mesh points in the ejecta
+mass_cut, -- core mass (in Msun)
+Rcen, -- in cm, left boundary for our grid (will be fixed and will not move)
+rhoCen -- in gcc, density in the artificial central zone adjacent to
+the 1st mesh of STELLA Lagrangean grid.
+
+Next lines from km=1 up to  Nzon:
+        km, dMr, r(km), rho(km), Tp(km), u(km), Mr(km), dummy;
+
+dummy, as well as dMr (mass of the spherical mesh zone), Mr
+(Lagrangean mass inside radius r) are not important (although dMr and
+Mr may be used for the control of our remapping),
+u is velocity at radius r.
+We have
+rho(km) and Tp(km) in the middle of
+the zone, between the radii r(km-1) and r(km).
+
+The second file *.abn has the lines for all Nzon zones with abundances
+
+   km,dummy,dummy,dummy,
+   H(km), He(km), C(km),
+   N(km), O(km), Ne(km), Na(km), Mg(km), Al(km), Si(km),
+   S(km), Ar(km), Ca(km), FePeak(km),
+   Ni58(km), Ni56(km)
+-- that is mass fractions of elements in this list where FePeak is for
+all iron peak elements minus Ni.
+Ni58 is for all stable Ni isotopes, and Ni56 is a special column for
+radioactive Ni56.
+
+If one has too many zones in the evolutionary model (more than 1000) one can put them all in those files.
+One can remap the model to a smaller number of zones for STELLA with the codes
+rezonhalf.trf
+rezonhalffine.trf .
+
+For Woosley's (KEPLER code) models in woo/ or modmake/ one must build
+an executable like woofill - to read KEPLER's models for 93J, type Ib etc.
+Synopsis:
+
+   woofill input_model/*ascii*/ ut_model.wmo/*bin*/ fNi
+
+If fNi argument is omitted then the 56Ni mass is the same as
+in the difference model *.wmo, otherwise 56Ni mass is enhanced by a factor
+fNi.E.g.
+
+woosley: woofill.trf -> woo
+model w13c.m (woo w13c.m w13c.wmo, woo w13c.mix w13cmix.wmo)
+ps. kogda zadayetsya 3 argument, to eto nado vo vtoroy raz obogashat' nickel'.
+gde-to u seregi zapisan etot koeficient. Zdesj: 1.168
+
+     woo w13c.mix w13cmn.wmo 1.168
+
+Other execs:
+
+nomwoo -- see makenommix, which is simply
+
+trf -c nommix.trf
+f77 -o nomwoo nommix.o ../obj/3x1/azdat.o
+
+type (there file chem.nom is needed)
+
+nomwoo nom87a.lmc nommix.wmo
+
+woo87mix and makewoo -- only for 87a format of KEPLER models.
+
+Program ut2woo.trf for transformation of Victor Utrobin's model to format 87a
+Woosley (in ascii text - file *.asc).
+
+Run
+  makeut
+and get
+  utwoo
+executable.
+Synopsis:
+
+  utwoo Utrobin_model this_model_reformatted.asc,
+
+e.g.
+  utwoo ut87a.lmc ut87a.asc
+
+for woo87mix one has to input
+   woo87mix input_model/* ascii */ ut_model.wmo/*bin*/ Nimass (solar)
+
+
+For woo/:
+
+Use the script
+
+makewoomixsf90.sh
+
+run it, e.g., like this:
+
+>  woomixs s1b7a.kep s1b7a.wmo
+>  woomixs w13c.mix w13cmn.wmo 1.168
+>  woomixs s15s7b2 s15s7ni.wmo 3 -- the 3rd argument is a factor for enhanced Ni
+
+Here one must make
+an executable like woofill or woomixs  - to read KEPLER's models for 93J, type Ib etc.
+Synopsis:
+
+   woofill input_model/*ascii*/ ut_model.wmo/*bin*/ fNi
+or
+   woomixs input_model/*ascii*/ ut_model.wmo/*bin*/ fNi
+
+If fNi argument is omitted then the 56Ni mass is the same as
+in the difference model *.wmo, otherwise 56Ni mass is enhanced by a factor
+fNi.
+E.g.
+
+woosley: woofill.trf -> woo
+model w13c.m (woo w13c.m w13c.wmo, woo w13c.mix w13cmix.wmo)
+ps. kogda zadayetsya 3 argument, to eto nado vo vtoroy raz obogashat' nickel'.
+gde-to u nas zapisan etot koeficient. Zdesj: 1.168
+
+     woo w13c.mix w13cmn.wmo 1.168
+
+Next step: produce initial model in directory eve/.
+Go to run/eve directory (formerly eve/run) and make models using *.eve data file
+
+You have after that 3 files (*.mod, *.xni and *rho).
+One of them has the extension "rho".
+It is initial model of Nzon zones (printed in the second line) at time which is also printed, say, t=1.0000E+04 sec.
+It has M_r, rho etc. Abundances are given as lg(X_i). The value -15 is a floor.
+"Fe" means a sum of Fe and Ni56. One has to compute Ni56, Co56 and Fe56 at each moment of real time.
+
+Repeating:
+*.rho files contain the
+compositions and initial structure. You read there, say, column C and
+number -3.1464E+00 means lg(X_C). Number -15 is just a floor value for
+all elements. The last line gives total mass of all elements in Msun.
+
+
+Next step: produce opacity tables.
+
+Formerly we used ronfsep.lnk:
+
+MACHINE=
+OBJ=../obj/${MACHINE}/3x1/
+
+f77 -o ronfict ronfsep.o \
+bessi0.o       fstrtoc.o      hypho.o        opacity.o      sparseblas.o \
+bessk0ex.o     gffcalc.o      lineexpop.o    pfsaha.o   \
+blas.o         gshfdxsec.o    lnblnk.o       tablsort.o \
+dmach.o        hydxsecl.o     mzalloc.o      sahaeqn.o      valence_nl.o \
+edensol.o      hydxsecn.o     ndex.o         setnucms.o     xmalloc.o \
+${OBJ}/length.o  \
+${OBJ}/stradio.o \
+${OBJ}/azdat.o
+
+Now everything is done by scripts like argmodel.sh and makefiles
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+2. Makefiles for opacity
+
+Now everything is done by makefiles.
+
+
+ And I also have to know what are wlmin and wlmax used for the frequency
+ grid.
+
+
+ this is what i find in begradsep.trf
+
+     DATA WLMAX/5.0D+04/,WLMIN/1.D+00/;
+
+ and in begtt.trf
+
+     DATA WLMAX/5.0D+04/,WLMIN/1.D+00/;
+
+ and in lbol.trf
+
+     DATA WLMAX/5.0D+04/,WLMIN/1.D+0/;
+
+
+
+ what changes do I need to make in these or other files to do a run with 200
+ bins?
+
+You should not change these files. As I wrote On Mar 19, 2017
+
+wlmin, wlmax are defined in
+
+vladsf/ronfndec.trf
+
+There is a request
+
+ <*deffreq: define frequency grid *>;
+
+ and the node
+
+ %_deffreq:
+   -- Compute frequency grid.
+
+Even if you change wlmin here in vladsf/ronfndec.trf you do not edit
+those DATA statements
+ (they are ignored for standard values of Knadap, as checked by Elena as well).
+
+In your current zone.inc you have
+
+ PARAMETER (NZ=3000000); --  for Nfreq=100, Mzon=600
+
+(actual numbers are Nfreq=40 and Mzon=300, but it is OK, since here it
+is just a comment)
+
+It seems to me that
+
+ PARAMETER (NZ=3000000); --  for Nfreq=200, Mzon=300
+
+should be OK (do not forget to increase @Mfreq  130 to @Mfreq  230)
+
+You may safely increase NZ to 6 mln or 12 mln. No problem if you have
+enough of RAM.
+
+I will be able to tell you exactly which NZ should work if I have hyd
+and abn files for your model.
+
+E.g. for your mesatest2 model I could run without a problem  in March with
+
+PARAMETER (NZ=12000000); --  for Nfreq=300, Mzon=412
+
+So just send me the model which is interesting to you for 200 bins in frequency.
+
+
+
+
+Standard makefiles are
+
+f90Stella.mak (see examples below) -- has some options for parallelization
+and
+serf90Stella.mak  -- for serial runs on scalar processors.
+
+Now f90Stella.mak is the standard makefile for ifort and
+f90StellaGF.mak for gfortran
+
+ make -f f90Stella.mak
+or
+ make -f f90StellaGF.mak
+shows you what can be done.
+
+
+KNadap=-4 in *.dat file in run/strad means the use of opacity from tables.
+The name of the table like ModelNameOpacity.1 is the last entry in the line with the current run.
+
+Opacity tables are not needed in very old runs when opazr.trf is used
+(a very crude opacity for hydrogen dominated compositions in Zeldovich Rayzer
+approximation) and in very new runs when we compute full opacity "on fly".
+
+This is done e.g. by
+
+make -f uniStella.mak stellaron
+
+which uses hapdirect.trf calling opacity(...) in opacityt.trf
+to compute direct Ron Eastman expansion opacity.
+Do not forget KNadap=-1 in *.dat file in run/strad directory (formerly strad/run)
+In this case you can write any name in strad.1 file in place of Opacity entry, it will
+be ignored.
+
+We have in opacity(...) one of arguments
+dvdr = velocity gradient =1/ts (in inverse seconds)
+so for any ts, dimensionless expansion parameter s=kappa_continuum*rho*c*ts.
+One ts is OK for free expansion (coasting) phase (e.g. early in SNIa), however,
+in general one has to compute dvdr in each mesh point km and it can be of either
+sign (negative for compression). This is not yet tested.
+
+There is another version hapdirect100.trf calling opacity100 in opacity100.trf
+when dvdr is ignored and the result in opacity100 is always for dvdr=1/ts for
+ts=100 days (for tests).
+
+For a while opacity100 was used for all runs (also with true ts, e.g. in toy SNIa
+Woosley's models) and the needed option (true ts, or ts=100 d) was decided in
+hapdirect.trf by commenting out respective lines. This is now in separate files
+to avoid confusion.
+
+
+Opacity tables are not needed when opazr.trf is used (a very crude
+opacity for hydrogen dominated compositions in Zeldovich Rayzer
+approximation).
+
+For parallel runs use makefile in vladsf/:
+$ make -f rparlnx.mak
+
+Then go to run/vladsf, check ronfict.1 and run:
+$ mpirun -n 6 ronfpar.exe
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+____________________________________________
+
+3. On STELLA units
+___________________________________________
+STELLA v raznostnyh s'hemah ispoljzuet svoi
+bezramernye edinicy (v nih uravnenija naibolee prosty, tak v fizike
+chastic chasto berut takie edinicy, chtoby h=c=1). No STELLA dolzhna
+vzaimodejstvovatj s programmami uravnenij sostojanija, opacity i t.d.,
+napisannymi, vozmozhno, drugimi ljudjmi, i s drugoj storony, vydavatj
+chto-to dlja poljzovatelja v kakih-to udobnyh dlja nego edinicah,
+vrode M_\sun i t.p. Poehtomu, dlja interface prihoditsja vvoditj
+prehodnye koefficienty edinic i vnutrj (k Ursos) i naruzhu (na pechatj
+ili grafiku).
+
+So, the basis for all units in STELLA (like h and c in particle physics)
+is
+
+  UR - unit of radius
+  Urho - unit of density
+  CG  - Newton's gravitation constant
+
+All fundamental constants are prepared and kept in
+src/fundrad.inc by the program src/fundparm.trf
+and units (almost all) are prepared by eve/evenew.trf
+and written to the binary file *.mod, read by STELLA
+(via begrad.trf). If STELLA starts a continuation of a run,
+they are read from the binary file *.prf (the initial data structure
+of which repeats the structure of the *.mod file) written by STELLA
+itself after each MBATCH steps (defined in *.dat file in strad/run).
+
+Given the basic units UR, Urho and CG we have other STELLA units
+
+  Utime=(4*pi*CG*Urho)**(-1/2)
+  UPressure=Urho*(UR/Utime)**2
+  UMass=4*pi*Urho*UR**3
+etc.
+
+Note, that those units are needed explicitly only for writing down
+the dimensionless equations. Since STELLA does the calculations
+in these dimensionless form it does not use all those identifiers
+explicitly. E.g. for the pressure, STELLA needs an interface value
+only between the eq. of state routine Ursos (which outputs
+the pressure in units UPUrs, e.g. in CGS) and its own UPressure.
+This interface value is denoted
+  UP=UPressure/UPUrs
+and is actually used by the STELLA routines. The same is for the mass
+  UM=UMass/CMS,
+where CMS is the value of the solar mass in grams (in fundrad.inc).
+But now UM is used mostly for the outward interface.
+
+Some units which are not needed for the initial model, and not
+defined in eve, (mostly for radiation) are defined in strad/begrad.trf.
+
+Those units that have endings *PRI are prepared for the printouts
+or graphics.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+4. Parameters in *.dat  files
+________________________________________________________________________
+
+   HMIN
+   HMAX
+   EPS is related to EPSJ
+   METH
+        ...
+   KFLAG
+
+см. в начале кода VTSTIF, e.g. in stiffbgh.trf:
+
+   HMIN    The minimum absolute value of the step size that will be
+             used for the problem. On starting this must be much smaller
+             than the average Abs(H) expected, since a first order
+             method is used initially.
+   HMAX    The maximum absolute value of the step size that will be
+             used for the problem.
+   EPSJ    The relative error test constant. Single step error estimates
+             divided by YMAX(I) must be less than this in the Euclidean
+             norm. The step and/or order is adjusted to achieve this.
+   METH    The method flag.
+             METH=1  means the implicit ADAMS methods
+             METH=2  means the GEAR method for stiff problems
+             METH=3  means the GEAR method, corrected by
+             R.K.Brayton, F.G.Gustavson & G.D.Hachtel in the
+             Proceedings of the IEEE v.60, No.1, January 1972, p.98-108
+
+
+abs(NSTA) - begin step; abs(NSTB) - end step
+-- see details in begrad.trf
+TcurA, TcurB - begin and end times for processing light curve
+(hence cur). TcurA here is not active (it is active in stinfo.trf
+-- STELLA info routine), since begin is dictated by the first step NSTA.
+But TcurB is the last moment of the run, so e.g. for SNR it must be much
+more than a few hundred days.
+
+NSTMAX dictates the last step number in this run (from NSTA).
+If t becomes > TcurB, then the run stops even if NSTMAX is not reached.
+
+Mbatch number of steps between saving model in *.prf and *.crv
+defined in strad.1 file
+
+The full line looks like
+  NSTMAX  NDebug    NOUT    IOUT (0 -full <0 print zones)   MBATCH
+  360000  1000000   100     0                               900
+
+If NDebug<NSTMAX the code will output debugging information and stop
+NOUT -- prints in *.res each NOUT step in detail
+IOUT 0 is very important to have hdf5 output in *.h5
+IOUT -1 will output each zone in *.res but very little to  *.h5
+Keep IOUT=0 as default!
+
+
+
+opacity-file in strad.1 is not important when you use opazr.trf.
+
+
+Not all files must be erased. If you wish to continue the run,
+just rename the file *.res (it is snr.res in SUPREMNA) to *.r1 or *.r2 etc...
+
+(*in Russian, relevant only for SUPREMNA *)
+  A в Bашем случае еще test.snr появился - его тоже надо
+  Hо проще в его   open   не задавать   status
+-- translation:
+  And in your case 'test.snr' has appeared - it should be also renamed.
+  A simpler way is to omit the entry 'status' in its 'open' instruction.
+
+If you wish to begin a new run (with the same names!) you must erase
+*.prf and *.crv. The driving routine strad.trf finds the value of the
+logical variable Begrun (Begin run):   if *.prf and *.crv exist,
+Begrun is .false.
+
+Q. (* in Russian, see its translation in the next paragraph *)
+...Почему-то после Ваших объяснений о назначении разных параметров в snr.dat
+у меня сложилось впечатление, что если задавать NSTB<=0,
+то Stella просто будет читать Eve-модель, не обращая внимания
+ни на какие свои *.prf и др. файлы, а она мне, оказывается,
+продолжала считать вчерашнюю модель. Но я опять перестала понимать,
+зачем тогда нужен NSTB...
+
+Q. For some reason after your explanation of the appointment of different parameters in snr.dat
+I had the impression that if we set NSTB <= 0,
+it will simply read Stella Eve-model, without paying attention
+to their *.prf files, etc., and it turns out that Stella
+continued to take yesterday's model. But again, I ceased to realize
+why NSTB is needed ...
+
+A.
+One has to look into begrad.trf about the role of NstA and NstB -
+of their values and signs - there are many combinations, depending
+also on Begrun (defined in strad.trf).
+
+TO or TOO is Time Of Output -- this identifier was used already inDmitriy  Nadyozhin's predecessors of STELLA.
+
+NTO -- Number of Time Outputs.
+
+>> Question: is 'gdepos' in the .tt file the energy from radioactive decay gamma rays?  if so, what are the units?
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+5. Running STELLA
+
+You should issue a command like this (if you work in tcsh, change for bash/zsh accordingly):
+
+ xstella.exe > & st.log &
+
+and all terminal output goes to st.log (if you see an old output there,
+then erase it or rename).
+
+During the run you can watch the progress issuing comand
+ tail -f st.log
+
+When it is enough to watch
+
+just do Ctrl-C
+
+If you issue 'nohup' option like (probably, 'nohup' may be omitted in current systems)
+
+nohup xstella.exe > & st.log &
+
+you can do
+ exit
+
+и гулять. Kак пел Gалич - Oн сачкует, а она (машина) работает...
+In English:
+you can relax then. As Galich sang - "He enjoys leisure, and it (the machine) is working...
+
+
+Sometimes it is better to do a screen command -
+
+Genug fuer Heute, enough for today
+  Yours SI
+
+Look into *.res.  If in the  NZMOD>NZ, we have stop.
+
+I must again switch to English.
+This means that the sparse matrix solver has not enough space for its
+work.
+
+
+The meaning of lines in *.log
+
+
+28   448  1   Hu= 9.157E-02              Ro= 1.000E-17  td=  2.70
+^Nstep ^  ^   ^ H used in STELLA units   ^central       ^comoving time, days
+       |  |order of method
+       |
+       |max error element Y
+
+     Ncnd=  0
+     ^Number of conductive zones, i.e. here full rad. transfer,
+      no zones in equilibrium diffusion approximation.
+
+      Tau=   2.50E-07 - optical depth for frequency bin L=Ltau (next line)
+    - but which L --  should be checked in strad.trf, it depends on version
+
+
+
+Tp<0 is the signal that the code wants to make a too big step,
+and somewhere cools too strongly - so it is the warning - and then
+the step is forced to be smaller and this limits the step.
+
+Meaning of important variables in the code.
+
+N is the total number of ODEs to solve. NVARS is the number of
+variables like r, u, T etc. defined in each mesh point.
+Ncnd is the number of central zones with thermal conduction (in equilibrium diffusion approximation).
+
+Radiative transfer is in Nzon-Ncnd outer zones, it has NFRUS times the
+number of zones with transfer for J and NFRUS times the same number for H.
+
+So KRAD is something like
+ KRAD=(NZON-Ncnd)*NFRUS,
+
+e.g. it can be at some point
+
+ KRAD1=(NZON-Ncnew)*LFR
+
+where LFR is a current NFRUS, and Ncnew is for Ncnd
+
+Later KRAD=KRAD1
+
+etc. We have in many places 2*KRAD since we have equations for both J and H.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+6. On ELTOT=ELVOL-ELSURF and VOLEN
+
+On ELTOT=ELVOL-ELSURF: I have written in TALK that ELsurf is the
+luminosity (NOT ELvol). Now you understand this correctly, but you
+forgot the talk. So, it is better to use e-mails - and PLEASE
+save them! I am a bit surprised that the meaning of those variables
+is not clear to you - it is very easy to see in LOSSEN (losses of
+energy). ELvol is the integral of ENG over mass. Eng is output
+by Volenpum.trf (subroutine VOLEN), it may be initial burst (Eburst
+in time tburst), or it may be radioactivity (then in these cases
+ENG > 0), or neutrino losses (ENG<0) etc. If we kill all radiative
+transfer, then the program will be 20 times faster, and then we
+must include the radiative (photon) losses into Eng, i.e. into
+Volen (Eng<0). But now photons are treated separately and leave the volume
+only through the surface - hence Elsurf.
+
+In the printout we write
+
+"Volume gains power" - this is Volen (in 1e50 erg/s)
+We subtract Elsurf from ELvol and get ELtot, since according
+to standard conventions the luminosity is > 0, but  we define
+ELtot as total gains power (not losses), so when ELtot>ELvol we have
+negative ELtot.
+
+Standard VOLEN is in volenpumnoint.trf currently.
+
+For a simple magnetar input you just need to change volenpumnoint.trf to the volenpumnointmag.trf,
+written by T.Moriya.
+
+The expression for Eng is changed to the magnetar input and other parts are kept the same.
+
+When you run it, *.dat file will be different from the usual one.
+
+The lines with
+
+AMHT(Solar)  EBurst(1e50) tBurst(s)  tstart -- Heated Core, Energy & time
+.1           3.d+01       1.d0       0.000
+
+should be changed to something like
+
+AMHT(Solar)  Emag (1e50)  t_mag(s)  t_BH -- Heated Core, "magnetar" Energy & time
+0.1           5d+2        4.32e5    8.64e4
+
+This corresponds to the initial magnetar energy input of 5e52 erg, the spin down time of 4.32e5 sec (5 days),
+and the BH formation time of 8.64e4 sec (1 day).
+
+In the case of usual magnetars not transforming to BHs, you can simply make t_BH extremely large like
+
+AMHT(Solar)  Emag (1e50)  t_mag(s)  t_BH -- Heated Core, "magnetar" Energy & time
+0.1          1d+2         4.32e5    1e30
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+7 Q. Again on NSTA and NSTB
+
+A.
+(it is only the 3rd time - so no problem in your asking).
+
+  On historical grounds for normal runs NSTA and NSTB are negative.
+Only abs(NSTA) and abs(NSTB) matters for the step number. But when
+   abs(NSTA) > abs(NSTB) then the run will start from the LAST model
+written either  in "normal".prf (Sumprf in STELLA). or in test.prf.
+If you wish to continue only normal runs do not change negative values
+of NSTA and NSTB keeping abs(NSTA) > abs(NSTB) and that is all.
+But if you have run already say 7200 steps, but wish to repeat
+for some test after the step 4500, then you should put
+
+NSTA   NSTB
+-4500  +4500
+
+then you start at your old step 4500, but you will write to a new
+file test.prf (otherwise you spoil Sumprf). The meanings of Units
+10, 12, 11 and 13 are also there in begrad.trf:
+
+%RM_Conr:
+    if(NSTA<0)then;
+       Lunit=10;
+       NFILE=Sumprf;
+    else;
+       Lunit=12;
+       NFILE='test.prf';
+    endif;
+    call StradIO('cm',Lunit,NFILE);
+    WRITE(@term,*)' Begrad  READ STEP=',NSTEP;
+%RM_Curv:
+    if(NSTA<0)then;
+       Lunit=11;
+       NFILE=Sumcur;
+    else;
+       Lunit=13;
+       NFILE='test.crv';
+    endif;
+
+
+-- the same for NSTB in the node %S.
+
+Now you see some logic in the negative values of NSTA,B. Test files are
+those which come later than the original ones.
+
+RESUME: to continue normal runs DO NOT change NSTA & NSTB. Clear or not?
+
+But in general a new run is not equivalent to the old one, because we are
+not able to save all Eddington factors. In a continuous run f_Edd is
+interpolated between two models, separated by @N_Edd steps (currently 50),
+but when you break the run the f_Edd is as is. But it is hard to understand
+how can it influence tau.
+In your *lnk file you should replace feauntm by feauj, and gdepos3 by
+gdepos4. They also may lead to a trouble.
+
+Try to avoid continuation of runs (if rad. transfer
+is ON). When you prepare the version of STELLA without rad. transfer,
+then the continuation must be smooth, but then it must be around 5 min
+for 10000 steps - no need to save anything intermediate.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+8. More on *.eve and *.dat files
+
+Everything is already prepared in Stella package for changes of Ekin,
+Ni56 mass etc.
+
+You go to run/eve (or eve/run in older versions od STELLA), edit *.eve file and change the line:
+
+expfac   velofac   rhofac   xnifac
+ 1.d3     1.0d0     1.d0     1.d0
+
+expfac  means homologous expansion (when the model in modmake is too dense)
+velofac changes velocity and hence energy as v**2
+rhofac  changes density - not good for fixed mass like Chandrasekhar,
+        but useful for other ejecta
+xnifac  changes Ni56
+
+if you change the first two factors you do not need new opacity.
+Simply rename *eve in eve/run and *dat file in strad/run
+change one  eve.1 line and one  strad.1 line  for new filenames in
+respective dirs, then run
+eve2.exe
+(without any script)
+then go to strad/run and run
+
+xstella6.exe
+
+If you change either of the last two factors you have to modify the
+script for new
+file names and run it to get new opacity tables.
+
+Note, that the change of explosion energy for type II's is done not
+by velofac, but simply in *.dat file if your presupernova model is in rest.
+
+  AMHT(Solar)  EBurst(1e50) tBurst(s)  tstart -- Heated Core, Energy & time
+  0.d-5         0.d-5       0.d-5      0.d0
+  EKO (kin.energy,1e50) mass fract.tri. u profile  us (out +1)
+  0.d-5                      0.d0  9.d-1  1.d0          +1.
+
+EBurst for thermal bomb
+EKO for kinetic bomb (both can be given at once, total explosion is EBurst+EKO).
+Kinetic energy at infinity will be of course smaller depending on the gravity
+of the compact remnant in the centre and on radiative losses.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+9. STELLA outputs
+
+The run produces a number of files.
+
+An important output variable from VTSTIF is
+
+   KFLAG   A completion code with the following meanings:
+             0 the step was succesful
+            -1 the requested error could not be achieved with
+               abs(H)=HMIN
+            -2 corrector convergence could not be achieved for
+               abs(H)>HMIN.
+             On a return with KFLAG negative, the values of t and the Y
+             array are as of the beginning of the last step, and H is
+             the last step size attempted.
+
+-- normally printed in *.res
+
+I have a question about the output in the res file.
+
+After %H: mark we have
+  NSTEP   KFLAG  JSTART  NQUSED    NFUN    NJAC       N   NFrus    Ncnd   NITER   NFAIL   NZMOD
+     400       0       4       4     881      71    9254      62      79       3       4  104416
+
+NSTEP   -- current step
+KFLAG 0 -- it is OK
+JSTART  -- the order of the method for the next time-step (i.e. the polynomial in time used for predictor-corrector)
+NQUSED  -- the same, but already used on previous step
+NFUN    -- the cumulative number of calls to RHS
+NJAC    -- the cumulative number of Jacobian evaluations
+N       -- current number of rad-hydro variables (r, u, Tp, J and H)
+NFrus   -- current number of frequency bins
+Ncnd    -- zones with km<=Ncnd are treated in thermal conduction, not full transfer
+NITER   -- cumulative number of iterations in sparse matrix solver
+NFAIL   -- cumulative number of failed corrector steps
+NZMOD   -- current number of nonzero elements in Jacobian.
+
+The next line:
+
+  OBS.TIME=       -0.76172 D   PROPER T= 3.78618384E+03 S  STEP USED= 5.76342E+01  STEP TRIED= 5.85364E+01 S
+
+  PROPER T is just time t in seconds on the current step in rad.hydro solver (temperature is denoted either as Tp, or temp)
+
+  OBS.TIME=(t-Rout/c)/86400 -- thus, in days. Observation time, takes into account the changing time delay due to propagation of light.
+  At early times it can be negative.
+
+
+
+Could you remind me what “E” means in “PARAMETERS OF PHOTOSPHERE”?
+
+  <======== PARAMETERS OF PHOTOSPHERE ========>
+    OB.T(D)         TEFF(10**3) RPH         VPH         Xph     HUSED     MBOL      -U-       -B-       -V-       -U-B-     -B-V-
+    670.00     E    2.684     222.750       2.760       0.085  1.75E+04   -19.443   -13.829   -15.223   -17.053     1.394     1.830
+    672.82          2.595     563.416       6.954       0.517  2.72E+03   -21.797   -21.735   -21.266   -21.717    -0.469     0.451
+
+The first row always has “E” and the luminosity there is somewhat different from those appear after it.
+
+Yes, this means that all parameters are taken at some optical depth, say tau=0.64,
+as in a spherical gray photosphere in a simple Equilibrium diffusion approximation
+at a typical wavelength, like B-band.
+First, we find T at this  tau, then declare that it is Teff, then take r at this tau and
+declare it as Rph.
+Then we have L=4\pi Rph^2 Teff^4. And UBV is found from the same T (blackbody colours).
+Normally the "E" numbers may differ strongly from all numbers in other lines
+(and in tt file) found from the full transfer.
+If they are close, this means that we have a calm photosphere indeed, like in our Sun.
+
+
+*.tt
+
+as is said above the file RUNNAME.tt is open in a tricky way in the code tt4strad.trf.
+
+The *.tt file contains
+
+time Tbb  rbb  Teff (crude)  Rlast_sc (crude)   R(tau2/3)   Mbol   MU    MB   MV   MI   MR  Mbolavg gdepos
+
+Note, that I and R are in reverse order due to historical reasons.
+
+what is the exact meanings of Tbb, rbb, Rlast_sc ?
+
+ Tbb - temperature from black body spectrum fitting
+ rbb - radius of photosphere calculated from Tbb and luminosity
+ Rlast_sc - rough estimation of the scattering boundrary.
+This is done by taking J and H (Eddington moments of intensity) and
+extracting such a radius of a sphere of uniform brightness
+which will reproduce them.
+
+ —  R(tau2/3) - is this defined with the Rosseland mean opacity?
+
+ Photoshperic radius in B band (approximately)
+
+
+The flux in Mbol printed in tt file is found in lbalsw.trf in
+     Obslum=Obslum+Y(@L)*WEIGHT(L)*(1.d0
+            +(uyp(Nzon-1)/clight)*(1.d0 + EddJ(Nzon-1,L))/HEdd(L)); -- observer
+            -- in first order u/c -- need be corrected for all orders
+            -- from Mihalas book:
+           -- (J, H, К) = [J_0 + 2beta H_0, H_0 + beta (J_0 + К_0), К_0 + 2beta H_0] -- Equation (14.124)
+This works only for frequency integrated fluxes.
+
+Lbol in lbol file is found in quite different way via ttt array using
+in Eddi a very approximate Doppler shift for each frequency. There is
+no such a good formula as 14.124 for monochromatic fluxes. I have
+invented some tricks to have a reasonable approximation. Thus
+independent Mbol and Lbol serve as a control of validity of v/c
+approximation.
+To my surprise, they agree amazingly well up to v~c/2. No wonder they
+break down for v~c. Even more surprising is that they agree well even
+for v ~ c  in stellarel version, where I use Lorentz transformations,
+but not a complete covariant treatment...
+
+
+gdepos is gamma-ray deposition, i.e. the power of heating of all the
+mass on the hydro grid by gamma-rays from 56Ni-56Co decays in units 1e50 erg/s.
+With account of 1-group rad.transfer of gammas.
+E.g. macro  ltt06gy in sn06gy.sm  uses it (it is called depos there).
+
+When comparing the results with observations one may use some data saved in repo.
+E.g. for SN1999em:  you may use its UBV data in
+
+  StellaM/res/sncurve/sai_Leonard/
+
+-----------------------------------------------------------------------------------------
+
+
+*.res *.mrt files:
+
+ What are the exact meanings of these quantities and units?
+
+ ZON    -- number of mesh zone
+
+ AM/SOL -- mass M_r within r(km), solar units (Msun).
+ When we see nonmonotic behaviour, like this:
+   1  1.72582
+   2  0.00408
+   3  0.00698
+   4  0.00990
+   5  0.01283
+   6  0.01573
+   7  1.74402
+  ...
+ this means that the mass M_r
+ in zone 2 is    1.72582+0.00408,
+ in zone 3 it is 1.72582+0.00698,
+ etc. until zone 7, where it is 1.74402.
+
+ When we see negative values, like
+ 999 -2.55E-08
+ this means that there is 2.55E-08 Msun left until the outer edge of the model.
+
+ R14.   -- r(km) in 1e14 cm
+
+ V 8.   -- velocity u(km) in 1e8 cm/s
+
+ T 5.   -- temperature in 1e5 K
+
+ Trad5  -- radiation temperature in 1e5 K, when zero this means the mesh zone is very deep and there is no need
+          to compute radiative transfer, so Trad==T
+
+ lgD-6. -- lg of density in 1e-6 gcc
+
+ lgP 7. -- lg of pressure in 1e7 CGS units (erg/cm^3==dyne/cm^2)
+
+ lgQv  -- lg artificial viscosity with 1e-50 floor in internal units
+     (just shows where shocks are still alive on the grid)
+     The same units as pressure.
+
+ lgQRT --   similar to lgqv, but for cold artificial viscosity
+
+This cold artificial viscosity is determined by parameter Bq in dat
+file when Bq is non-zero. See our paper with Takashi Moriya on 06gy (Appendix as well):
+http://adsabs.harvard.edu/abs/2013MNRAS.428.1020M
+
+ XHI -- it is the fraction of neutral hydrogen relative to all hydrogen,
+[HI]/[H] by Saha formula. It is computed even when hydrogen is not present.
+
+ ENG -- volume energy gains (losses if negative), units 1e+12 erg/g/s
+
+ LUM -- L_r, erg/s
+
+ CAPPA : is this Rosseland mean opacity?
+
+ yes
+
+ n_bar -- number density of baryons
+
+ n_e   -- number density of electrons
+
+ Fe    -- number density of Iron nuclei
+
+ II    -- fraction [Fe II] / [Fe]
+
+ III   -- fraction [Fe III] / [Fe]
+
+-----------------------------------------------------------------------------------------
+
+*.swd
+
+One of them has an extension swd (Shock Wave Details). It has outputs for Nzon
+zones at NTO prescribed moments of time TOO:
+
+time in days col 1 (when nonzero)
+radial zone number km col 2
+logarithm of Lagrangean mass/Msun from surface (like in MESA) lgm col 3
+logarithm of radius cm lgr 4
+velocity in 1e8 cm/s v8 col 5
+lg T col 6
+lg Trad col  7 when nonzero
+lg rho in 1e-6 gcc col 8
+lg P col 9 units 1e7 CGS
+lg qv artificial viscosity col 10
+lg eng12 in 1e12 erg/s/g col 11
+luminosity L_r lum40 in units 1e40 erg/s col 12
+kappa_Rosseland cap col 13
+
+Repeating:
+
+Files with *.swd extension contain our  edits for respective
+radiation-hydro runs.
+The meaning of the columns there:
+
+1. #  t, day
+is given in a bit retarded form t=t_comoving - Rout/c
+
+2. km -- the number of mesh point, the same as in *.rho
+
+3. lg m,sun    -- Lagrangean mass counted from the SURFACE, contrary to
+  mass in *.rho, counted from the centre. Now it does not have an inert
+  core which is there in *.rho, here we have only ejecta.
+
+4. lgr -- lg radius, cm
+
+5. v8  -- v, 1e8 cm/s
+
+6. lgT -- lg T, K
+
+7. lgTrad -- the same for Trad, found from Erad=a*Trad^4
+
+8. lgrho-6  -- lg rho, in units 1e-6 gcc
+
+9. lgP+7   -- lg pressure, units 1e+7 CGS
+
+10. lgqv    -- lg artificial viscosity with 1e-50 floor in internal units
+    (just shows where shocks are still alive on the grid)
+
+11. lgeng12 -- volume energy losses/gains, units 1e+12 erg/g/s
+
+12. lum40   --  abs(L/1e40) for L in erg/s
+
+13. kappa -- Rosseland opacity, cm^2/g
+
+-----------------------------------------------------------------------------------------
+
+*.ph spectrum (SED) evolution
+
+ File *.ph  contains the multi-group spectrum evolution.
+
+The first line gives lg[frequency in Hz] for all groups.
+
+Next lines:
+
+Col. 1 retarded time, days
+Col. 2 number of frequency groups actually used (NFRUS)
+Col. 3 ignore (may be some estimate of R_ph in stella units, but uncertain)
+Col. 4ff lg[Luminosity_\nu in erg/(s*Hz)] for the same groups as in
+the first line for bins from 1 up to NFRUS.
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+====================
+10. Tricks for f90, f95.
+====================
+
+Get a new
+
+f90Stella.mak or serf90Stella.mak
+
+and many other trf, f90 and data files.
+We have  now many things in f90 modules made by Petr in src/, and also
+there are many new atomic data, added by Elena
+from WMbasic.
+
+The new scripts like ioStellaW7.sh use f90Stella.mak, and it is easy to do by hand
+
+Please go to obj/
+
+     ln -s ../src/nlte_param1.inc
+     ln -s ../vladsf/wmbasron.inc
+     ln -s ../vladsf/mblock.inc
+     ln -s ../vladsf/mlogbl.inc
+
+Check also libraries, now I am using the "strict" option, this is not
+obligatory. but if you whish, do:
+
+    cd ../sparse/
+        make -f sparselibStr.mak clean
+        make -f sparselibStr.mak
+        cd ../LNAG/
+       make -f lnaglibStr.mak clean
+       make -f lnaglibStr.mak
+
+Then back again to obj/ and look into many new options (replace f90Stella.mak by serf90Stella.mak
+below for runs on scalar processors):
+
+make -f f90Stella.mak
+
+make -f f90Stella.mak clean
+
+Check your zone.inc and opacity.inc files linked correctly in obj/  !
+
+make -f f90Stella.mak bftot
+
+this makes Elena's opacity tables with excited levels from WMbasic
+
+make -f f90Stella.mak bftotshb
+
+a fast version for uniform composition
+
+make -f f90Stella.mak inner
+
+this makes opacity tables with Petr's innershell photoionizations.
+Please note that one has to run make TWO times after clean - here are
+f90 modules
+produced
+
+make -f f90Stella.mak innersh
+a fast version for uniform composition
+
+With the new tables run xstella* as usual.
+
+----------------------------------------------------------------
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+11. Пётр Бакланов.
+
+Нужен ваш совет по устройству стеллы:
+
+Если  я беру Fj from Y:
+Fj(L) = Y(p_Nvars*zone_Y + (zone_Y-ncnd)*(L-1)-ncnd + km,1);
+
+то производную по времени Fj:
+dotFfj(L) = Y(p_Nvars*zone_Y + (zone_Y-ncnd)*(L-1)-ncnd + km,2);
+
+Да?
+
+В Y  dotFfj  всегда определен, когда и Fj ?
+
+В принципе dotTrad и dotW  мне надо вычислять  только в hcdfnrad.trf.
+Там есть массив FSAVE, может надо лучше брать оттуда dotFfj ?
+согласно строке:
+./strad/hcdfnrad.f:685:      FSAVE(NVARS*NZON-Ncnd+(NZON-Ncnd)*(L-1)+Km+NYDIM)=DFJ(L)
+
+Ответ.
+Петя! В Y(*,2) хранится dot Y(*,1)*h, а в DFJ(*) именно dFj/dt, это делает субрутина traneq
+(transport equation) и потом это шлётся в FSAVE.
+
+FSAVE состоит из двух половин длиной NYDIM: в первой половине лежат сами величины r,u,T,J_f,H_f,
+а во второй половине от NYDIM+1 до NYDIM лежат их производные.
+
+Отличие производных в Y и в FSAVE в том, что Y получается уже после итераций предиктор-корректор
+- это уже готовые величины и их разложение в ряд Тейлора по t :
+Y(*,m)= (dot^(m-1) Y(*,1))*h^(m-1)/(m-1)!,
+а в FSAVE лежат рабочие промежуточные величины в ходе итераций.
+
+Таким образом, в Y  dotFfj НЕ всегда определен, когда и Fj,
+а только в конце итераций корректора и успешного шага stiff.
+
+
+
+Рабочую dFj/dt получайте из traneq или из FSAVE, если FSAVE уже посчитана и не испорчена

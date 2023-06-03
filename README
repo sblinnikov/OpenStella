@@ -1,0 +1,193 @@
+This README is not for full description of STELLA (see readme.stella). 
+It describes only standard work with initial tests and scripts.
+When running *.sh scripts check carefully their outputs! 
+
+A universal script argmodel.sh (or argmodelGF.sh for gfortran) may be used for the fastest test of a weak SNIa model:
+ argmodelGF.sh  m030307mhomo
+It will be fast if you copy src/opacityHomo.inc to src/opacity.inc before running the script
+(otherwise, if you use standard opacity.inc the script will spend an hour for building the opacity table).
+
+STELLA relies on the trefor preprocessor since it was written in times of very
+poor fortran-IV. Thus, a rich language for program design was developed and is
+used to generate the fortran source files of STELLA. The source code of trefor
+is shipped with the STELLA repository and automatically compiled by the
+argmodel.sh (or argmodelGF.sh) script. The executables, trf, trefor, trefor95,
+can be found in stellam/bin and should be included into your general executable
+path, e.g. /usr/local/bin. Make sure that the configuration file .trfrc is
+located in your $HOME. If not, copy it from stellam/trefor. Note that you may
+have to run the argmodel.sh script again after including trefor into your $PATH
+in order to compile all necessary libraries.
+
+To begin with general runs:
+select a universal script argmodel.sh with an argument as a name of the model.
+Or just select a script like
+ioStellaW7.sh
+and it compiles for W7
+
+So prepare *.abn and *.hyd files in modmake/ and the same name dat file in
+strad/run, say, for R800M19Ni06 model (any name is allowed, see the samples in modmake/) and
+simply do:
+
+ argmodelGF.sh R800M19Ni06
+
+Use an appropriate zone*.inc file in src/zone.inc to accommodate your radial 
+and frequency grid without overwhelming the RAM memory.
+
+If unsure about zone.inc and opacity.inc files simply erase them in
+src/, the script will do correctly if your model is non-homogeneous and has more than 50 zones
+in radius (note using opacityHomo.inc in opacity.inc for homogeneous models).
+
+
+To write to *.hyd file use these statements:
+
+ write(12,'(1p,e12.3,i6,3e13.5)') timetobegin, -- may be zero, but see below
+Nzone,
+BM1, -- NS core mass, may be zero
+Rcen, -- core radius, may be zero
+rhoCen; -- density to left of your first rho on grid (not the NS core
+density!), must be nonzero but may be equal to rho(1) on the grid.
+
+then do loop over your mesh points:
+
+ write(12,'(1x,i4,1p,e12.4,e15.7,5e12.4)')
+      km, dMr(km), rHyd(km), rhoHyd(km), TpHyd(km), uHyd(km), aMr(km), dum;
+
+and this is for *.abn:
+   write(13,'(i4,1p,19e10.3)')km,dum,dum,dum,
+-- No.  Mr    X(H He C N O Ne Na Mg Al Si S Ar Ca Fe Co Ni 56Ni)
+     bh(km), bhe(km),bc(km),
+     bn(km),bo(km),bne(km),bna(km),bmg(km),bal(km),bsi(km),
+     bs(km),bar(km),bca(km),bfe(km),
+     bni58(km),bni56(km); -- with Ni58 separated
+
+dum is dummy, may be zero.
+
+dMr, rhoHyd, TpHyd and abundances are given in the middle of mesh
+number km, all the rest are on the right border of the mesh.
+
+timetobegin: for models which already are exploded by another code
+(like for Ia models) this must be a nonzero time after the explosion,
+like 1e4 seconds, not much less. In some codes it is called timesnia,
+but works also for core-collapsing SNe.
+If you take a model at rest, then this is zero. The explosion is done
+with energy Eburst or Eko in strad/run/*.dat file.
+
+After the first successful run of your model you can change energy of
+explosion and some other things without a script, just changing
+dat file in strad/run/.
+
+Do not forget (every working day with stella) to begin with
+svn up.
+
+I shall normally not write warning e-mails.
+
+After first successful runs with Stella*.sh scripts it is better to work with
+
+make -f f90Stella.mak
+
+in obj/
+
+For eve:
+make -f f90Stella.mak eve2
+
+edit eve.1 for your your
+
+For opacity check opacity.inc
+
+ _Define @skip 4 -- step in mass zones for tables in composition
+-- @skip (Mzon/2) -- test and uniform runs
+@skip (Mzon/50) -- standard
+-- @skip (Mzon/45) -- for 45 zones
+
+and do
+
+make -f f90Stella.mak ronfict
+whil will create  xronfict.exe in ../vladsf/
+
+cd ../vladsf/
+
+edit  ronfict.1 for your model created in eve
+
+vladsf/lineatom.dat -- keeps atomic line data
+
+
+Our main version for Stella is
+
+make -f f90Stella.mak stella6
+
+Everything is already prepared in Stella package for changes of Ekin,
+Ni56 mass etc.
+
+You go to eve/run, edit *.eve file and change the line:
+
+expfac   velofac   rhofac   xnifac
+ 1.d3     1.0d0     1.d0     1.d0
+
+expfac  means homologous expansion (when the model in modmake is too dense)
+velofac changes velocity and hence energy as v**2
+rhofac  changes density - not good for fixed mass like Chadrasekhar,
+        but useful for other ejecta
+xnifac  changes Ni56
+
+if you change the first two factors you do not need new opacity.
+Simply rename *eve in eve/run and *dat file in strad/run
+change one  eve.1 line and one  strad.1 line  for new filenames in
+respective dirs, then run
+eve2.exe
+(without any script)
+then go to strad/run and run
+
+xstella6.exe
+
+If you change either of the last two factors you have to modify the
+script for new
+file names and run it to get new opacity tables.
+
+Note, that the change of explosion energy for type II's is done not
+by velofac, but simply in *.dat file if your presupernova model is in rest.
+
+  AMHT(Solar)  EBurst(1e50) tBurst(s)  tstart -- Heated Core, Energy & time
+  0.d-5         0.d-5       0.d-5      0.d0
+  EKO (kin.energy,1e50) mass fract.tri. u profile  us (out +1)
+  0.d-5                      0.d0  9.d-1  1.d0          +1.
+
+They must look for a thermal bomb like
+  AMHT(Solar)  EBurst(1e50) tBurst(s)  tstart -- Heated Core, Energy & time
+   6.d-02       1.7d+01       1.d-1    0.d0
+
+EBurst for thermal bomb
+EKO for kinetic bomb (both can be given at once, total explosion is EBurst+EKO).
+Kinetic energy at infinity will be of course smaller depending on the gravity
+of the compact remnant in the center and on radiative losses.
+
+
+Use screen command to run your jobs.
+Type in the root of your working StellaApus directory:
+
+runAloneStella.sh xstella6.exe
+
+Instead of xstella6.exe there can be any other name of your executable.
+
+Use
+
+rmRun.sh RootNameOfYourOldRun
+ 
+to remove all files (except of *.dat) of your old run.
+
+One can  use our sm macros
+in res/snias.sm pack for plotting type Ia light curves. There is also a new pack ph.sm
+to plot continuum spectra. With 1000 frequencies some prominent lines become visible.
+Of course this is not a true observed  PCyg line spectrum. Even in our LTE approximation
+we need a better routine for producing a line spectrum for observer. I would be grateful
+if anybody tells me what is available at hand.  We may try to take an open part
+of CMFGEN (Hillier, Dessart)  which must be not to hard to adapt since Stella gives us
+its multigroup radiation field and the source function.  I mean: not to try NLTE spectum in the beginng.
+Let us try to produce the LTE spectrum, like SYNOW (Fisher, 2000, PhD) does.
+But people use SYNOW to try to identify lines and to find element abundances giving good fits to obeserved spectra. We shall
+simply look at the result that Stella predicts for an observer for any given model.
+
+
+Best wishes to everybody,
+
+   Sergei
+
