@@ -20,9 +20,10 @@ Pause()
 }
 
 echo This script will run a model produced with Weaver-Woosley KEPLER code
-echo appropriate files *.hyd and *.abn are needed in modmake dir, as well as *.dat file in strad/run
-echo file of a type lineatom.dat should be symbolically linked in directory vladsf
-echo --run/vladsf in newer versions of STELLA/RADA-- or sit there
+echo Do not use it for W7* models!!!
+echo appropriate files *.hyd and *.abn are needed in modmake dir, as well as *.dat file in run/strad .
+echo The file lineatom.dat will be symbolically linked to run/vladsf by this script
+echo Input the second argument "1" if a new opacity table must be computed
 Pause
 #   Set model remap parameters:
  InputModel=$1
@@ -35,10 +36,10 @@ Pause
  Nmult=1    # factor to multiply Nkeep zones to refine cenral zoning
 
  BuildNewModel=1         # Set this to 1 if a new model must be computed
- KeepModelZones=1        # Set this to 1 to keep original number of zones as in W7
+ KeepModelZones=1        # Set this to 1 to keep original number of zones
  OpacityTable=${InputModel}
 # OpacityTable=${RezonedModel}
- NewOpacity=1            # Set this to 1 if a new opacity table must be computed
+ NewOpacity=$2            # Set this to 1 if a new opacity table must be computed
  RunTTfit=0              # Set this to 1 if the run has not produced *.tt file
 #Composition=uniform     # for opacity, mostly for tests
  Composition=mixed       # for opacity, may be a crude zoning table with @skip of zones
@@ -100,13 +101,15 @@ fi
  echo $HOMEStella
  echo '******'
  export HOMEStella=$HOMEStella
+
+
 if [ ! -e $HOMEStella/bin  ]; then
    mkdir $HOMEStella/bin
    echo directory $HOMEStella/bin created
 fi
 
-if [ ! -e $HOMEStella/strad/run/${run}.dat  ]; then
-   echo $HOMEStella/strad/run/${run}.dat does not exist
+if [ ! -e $HOMEStella/run/strad/${run}.dat  ]; then
+   echo $HOMEStella/run/strad/${run}.dat does not exist
    echo I exit now due to this error...
    exit 2
 fi
@@ -140,7 +143,7 @@ if [ ! -e $HOMEStella/bin/trf ]; then
    if [ ! -e $HOME/.trfrc ]; then
      echo checking HOME/.trfrc
      cp .trfrc $HOME
-     echo copying it to HOME
+     echo copying .trfrc to HOME
      Pause
    fi
    make clean
@@ -149,6 +152,12 @@ if [ ! -e $HOMEStella/bin/trf ]; then
    echo '******'
   else
      echo trf found in /usr/local/bin
+   if [ ! -e $HOME/.trfrc ]; then
+     echo checking HOME/.trfrc
+     cp $HOMEStella/trefor/.trfrc $HOME
+     echo copying .trfrc to HOME
+     Pause
+   fi
   fi
 fi
 echo HOME $HOME
@@ -193,7 +202,7 @@ fi
  echo current directory is:
  cd $HOMEStella/modmake
  pwd
- echo '******'
+ echo '******' `pwd`
 Pause
  if [ ! -e zone.inc ]; then
    ln -s $HOMEStella/src/zone.inc .
@@ -273,10 +282,8 @@ else
 fi
 
 mzon=`sed q $model_name | awk '{print $2}'`
-echo $mzon
-
-old_pattern=Mzon=[0-9]*
-new_pattern=Mzon=$mzon
+echo Mzon needed:  $mzon
+Pause				# invoke the function Pause.
 
 if [ -f $HOMEStella/src/zone.inc ]
 then
@@ -286,26 +293,53 @@ else
     exit 4
 fi
 
- old_param=`sed -n '/--/!s/Mzon=[0-9]*/&/p' $inc_name`
- new_param="PARAMETER($new_pattern);"
- echo old_param $old_param
- echo new_param $new_param
+old_pattern=Mzon=[0-9]*
+new_pattern=Mzon=$mzon
+
+echo old_pattern $old_pattern
+echo new_pattern $new_pattern
+
+
+###################################################################
+# old_param=`sed -n '/--/!s/Mzon=[0-9]*/&/p' $inc_name`			  #
+# new_param="PARAMETER($new_pattern);"							  #
+# echo old_param $old_param										  #
+# echo new_param $new_param										  #
+# 																  #
+# 																  #
+# if [ "${old_param}" == "${new_param}" ]						  #
+# then															  #
+#   echo Mzon is not changed									  #
+# else															  #
+#  echo sed modifies zone.inc									  #
+# #  Here is where the heavy work gets done.					  #
+# # -----------------------------------------------				  #
+#   sed -e "/--/!s/$old_pattern/$new_pattern/" $inc_name > qq.inc #
+# # -----------------------------------------------				  #
+# #  's' is, of course, the substitute command in sed,			  #
+# #  /--/! means except for lines with "--"						  #
+# #+ and /pattern/ invokes address matching.					  #
+#  mv qq.inc $inc_name											  #
+# fi															  #
+###################################################################
+
+old_param=`sed -n '/--/!s/Mzon\s*=\s*\d*\b.*/&/p' $inc_name`
+new_param=`echo "${old_param}" | sed -e "s/[0-9]\+/${mzon}/" `
+
+echo old_param: "'${old_param}'"
+echo new_param: "'${new_param}'"
 
 
 if [ "${old_param}" == "${new_param}" ]
 then
-  echo Mzon is not changed
+	echo 'Mzon is not changed'
 else
- echo sed modifies zone.inc
-#  Here is where the heavy work gets done.
-# -----------------------------------------------
-  sed -e "/--/!s/$old_pattern/$new_pattern/" $inc_name > qq.inc
-# -----------------------------------------------
-#  's' is, of course, the substitute command in sed,
-#  /--/! means except for lines with "--"
-#+ and /pattern/ invokes address matching.
-  mv qq.inc $inc_name
+	echo 'sed modifies zone.inc'
+	sed -e "/--/!s/${old_param}/${new_param}/"  $inc_name > qq.inc
+    mv qq.inc $inc_name
 fi
+
+Pause				# invoke the function Pause.
 
 # Prepare to build Stella
  echo '******'
@@ -348,27 +382,52 @@ fi
 
 if [ $BuildNewModel == 1 ]
 then
- make -f Stellaf90.mak clean
- make -f Stellaf90.mak eve2
- echo '******'
- echo start building initial model in Stella format
- echo '******'
- echo current directory is:
- cd $HOMEStella/eve/run
- pwd
- echo '******'
- if [ -f $HOMEStella/eve/run/eve.1 ]
- then
-    rm $HOMEStella/eve/run/eve.1
- fi
-
- sed -e "s/testh/${InputModel}/g" evehead.1 > eve.1
-  ./eve2.exe ${InputModel}
+	make -f Stellaf90.mak clean
+	make -f Stellaf90.mak eve2
+	echo '******'
+	echo '****** eve2.exe created'
+	echo start building initial model in Stella format
+	echo '******'
+	echo current directory is:
+	cd $HOMEStella/run/eve/
+        Pause
+	pwd
+	echo '******'
+	##################################################################
+	# if [ -f $HOMEStella/run/eve/eve.1 ]							 #
+	# then															 #
+	#    mv $HOMEStella/run/eve/eve.1 $HOMEStella/run/eve/eve.1.prev #
+	# fi															 #
+	# 																 #
+	# sed -e "s/testh/${InputModel}/g" evehead.1 > eve.1			 #
+	##################################################################
+	echo ls -l evehead.1*
+	ls -l evehead.1*
+        Pause
+        if [ ! -e  evehead.1 ]; then
+          cp evehead.1.sample evehead.1
+        fi
+##	fileEve=${HOMEStella}/run/eve/eve.1
+	fileEve=eve.1
+	echo ls -l $fileEve
+	ls -l $fileEve
+        echo fileEve $fileEve
+        Pause
+	if [ -f $fileEve ]
+	then
+		line=`sed '2!d' evehead.1  | sed -e "s/testh/${InputModel}/g"`
+		echo "Insert to ${fileEve} line: ${line} "
+		sed  -i "2i ${line}" $fileEve
+	else
+		sed -e "s/testh/${InputModel}/g" evehead.1 > $fileEve
+	fi
+	./eve2.exe
+##		./eve2.exe ${InputModel}
+#	./xevehyd.exe
 fi # for BuildNewModel
 
 
-
-if [ $NewOpacity == 1 ]
+if [ "$NewOpacity" == 1 ]
 then
 # Prepare opacity tables for given model
  echo '******'
@@ -385,66 +444,106 @@ Pause				# invoke the function Pause.
             make -f Stellaf90.mak ronfshb
                ;;
       'mixed')
-            make -f Stellaf90.mak ronfict
+            make -f rparlnx.mak clean
+            make -f rparlnx.mak inner
+#            make -f Stellaf90.mak ronfict
                ;;
       'OutUniform')
             make -f Stellaf90.mak ronfoutuni
                ;;
  esac
- echo '******'
- echo stupid make must be repeated for f90 modules
-Pause
-
- case "$Composition" in
-      'uniform')
-            make -f Stellaf90.mak ronfshb
-               ;;
-      'mixed')
-            make -f Stellaf90.mak ronfict
-               ;;
-      'OutUniform')
-            make -f Stellaf90.mak ronfoutuni
-               ;;
- esac
+######################################################
+#  echo '******'									 #
+#  echo stupid make must be repeated for f90 modules #
+# Pause												 #
+# 													 #
+#  case "$Composition" in							 #
+#       'uniform')									 #
+#             make -f Stellaf90.mak ronfshb			 #
+#                ;;									 #
+#       'mixed')									 #
+#             make -f Stellaf90.mak ronfict			 #
+#                ;;									 #
+#       'OutUniform')								 #
+#             make -f Stellaf90.mak ronfoutuni		 #
+#                ;;									 #
+#  esac												 #
+######################################################
  echo '******'
  echo current directory is:
- cd $HOMEStella/vladsf
+ cd $HOMEStella/run/vladsf
  pwd
  echo '******'
 
- if [ -f $HOMEStella/vladsf/ronfict.1 ]
+if [ ! -f $HOMEStella/run/vladsf/lineatom.dat ]
+then
+#  ln -s $HOMEStella/../StellaMG/OpenStellaM/vladsf/lineatom.dat .
+  ln -s $HOMEStella/run/vladsf/lineatom_may07.dat lineatom.dat
+fi  
+
+if [ ! -f $HOMEStella/run/vladsf/yakovlev ]
+then
+  ln -s $HOMEStella/OpenStellaM/vladsf/yakovlev .
+fi  
+
+
+ echo check that  $HOMEStella/run/vladsf/${InputModel}.{1-6,ab} tables are non-zero
+ Pause
+
+# if [ ! -f $HOMEStella/run/vladsf/${InputModel}.ab ] # InputModel opacity table do not exist
+# then
+#
+# echo opacity tables must be computed
+# Pause
+
+
+ fileRnf=${HOMEStella}/run/vladsf/ronfict.1
+ if [ -f $fileRnf ]
  then
-    rm $HOMEStella/vladsf/ronfict.1
+	line=`sed '2!d' ronfhead.1  | sed -e "s/testh/${InputModel}/g"`
+	#	echo "Insert to ${fileEve} line: ${line} "
+	sed  -i "2i ${line}" $fileRnf
+ else
+	 #    mv $fileRnf  $fileRnf.prev
+	sed -e "s/testh/${InputModel}/g" ronfhead.1 > $fileRnf
  fi
 
- sed -e "s/testh/${InputModel}/g" ronfhead.1 > ronfict.1
 
- if [ -f $HOMEStella/vladsf/ronf.log ]
+ if [ -f $HOMEStella/run/vladsf/ronf.log ]
  then
-    rm $HOMEStella/vladsf/ronf.log
+    rm $HOMEStella/run/vladsf/ronf.log
  fi
 
 echo Opacity is ready to start
 Pause				# invoke the function Pause.
 
  echo Opacity is starting, watch
- echo  tail -f $HOMEStella/vladsf/ronf.log
- echo  and/or tail -f $HOMEStella/vladsf/ronfict1.res
+ echo  tail -f $HOMEStella/run/vladsf/ronf.log
+ echo  and/or:
+ echo  tail -f $HOMEStella/run/vladsf/ronfict1.res
 
  case "$Composition" in
       'uniform')
-          nohup  ./xronfshb.exe >& $HOMEStella/vladsf/ronf.log
+          nohup  ./xronfshb.exe >& $HOMEStella/run/vladsf/ronf.log
                ;;
       'mixed')
-          nohup  ./xronfict.exe >& $HOMEStella/vladsf/ronf.log
+          nohup mpirun -np 6 ./xinsh.exe >& $HOMEStella/run/vladsf/ronf.log
+#           nohup nice +20 mpirun -np 6 ./xinsh.exe >& $HOMEStella/run/vladsf/ronf.log # this does not work in bash
+#           nohup  ./xronfict.exe >& $HOMEStella/run/vladsf/ronf.log
                ;;
       'OutUniform')
-          nohup  ./xronfoutuni.exe >& $HOMEStella/vladsf/ronf.log
+          nohup  ./xronfoutuni.exe >& $HOMEStella/run/vladsf/ronf.log
                ;;
  esac
 
+# fi # for InputModel opacity table check
+
+
  echo Opacity done
 fi # for NewOpacity
+
+Pause
+
 
 if [ ! -e $HOMEStella/res  ]; then
    mkdir $HOMEStella/res
@@ -454,7 +553,7 @@ fi
 if [ $RunTTfit == 1 ]
 then
  make -f Stellaf90.mak ttfit
- cd $HOMEStella/strad/run
+ cd $HOMEStella/run/strad
  xttfit.exe
  exit
 fi
@@ -471,23 +570,56 @@ fi
 
  echo '******'
  echo current directory is:
- cd $HOMEStella/strad/run
+ cd $HOMEStella/run/strad
  pwd
  echo '******'
-if [ -f $HOMEStella/strad/run/strad.1 ]
-then
-    rm $HOMEStella/strad/run/strad.1
-fi
+###########################################################################
+# if [ -f $HOMEStella/run/strad/strad.1 ]								  #
+# then																	  #
+#     mv $HOMEStella/run/strad/strad.1 $HOMEStella/run/strad/strad.1.prev #
+# fi																	  #
+# 																		  #
+#  sed -e "s/run/${run}/g" stradheadopa.1 > qq.1						  #
+#  sed -e "s/testh/${InputModel}/g" qq.1 > qqq.1						  #
+#  sed -e "s/opa/${OpacityTable}/g" qqq.1 > strad.1						  #
+###########################################################################
 
- sed -e "s/run/${run}/g" stradheadopa.1 > qq.1
- sed -e "s/testh/${InputModel}/g" qq.1 > qqq.1
- sed -e "s/opa/${OpacityTable}/g" qqq.1 > strad.1
 
-if [ -f $HOMEStella/strad/run/st.log ]
-then
-    rm $HOMEStella/strad/run/st.log
-fi
+ fileStrad=${HOMEStella}/run/strad/strad.1
+ echo fileStrad $fileStrad
+ if [ -f $fileStrad ]
+ then
+   stradfilesize=$(stat --format=%s $fileStrad)
+   echo "$stradfilesize"
+   minimumsize=100
+   if [ $stradfilesize -le $minimumsize ]; then
+     echo strad.1 is small size="$stradfilesize"
+     cp ${HOMEStella}/run/strad/strad.1.sample $fileStrad
+   fi
+ else  
+   cp ${HOMEStella}/run/strad/strad.1.sample $fileStrad
+ fi
+
+ Pause
+
+
+ if [ -f $fileStrad ]
+ then
+	 line=`sed '2!d' stradheadopa.1  | sed -e "s/run/${run}/g" -e "s/testh/${InputModel}/g" -e "s/opa/${OpacityTable}/g"`
+	 echo "Insert to ${fileStrad} line: ${line} "
+	 sed  -i "2i ${line}" $fileStrad
+ else
+	 sed -e "s/run/${run}/g" stradheadopa.1 > qq.1
+	 sed -e "s/testh/${InputModel}/g" qq.1 > qqq.1
+	 sed -e "s/opa/${OpacityTable}/g" qqq.1 > $fileStrad
+ fi
+
+
+ if [ -f $HOMEStella/run/strad/st.log ]
+ then
+     rm $HOMEStella/run/strad/st.log
+ fi
 
  nohup ./xstella6y12m.exe >& st.log &
  echo Stella is started, watch
- echo tail -f $HOMEStella/strad/run/st.log
+ echo tail -f $HOMEStella/run/strad/st.log
