@@ -1,0 +1,49 @@
+  _outcom ;
+  _trace "------";
+Program ronfpar;
+  -- This is a front end for the expansion opacity routine by Ron Eastman
+  -- (UCSC-LLL, 1993-1994)
+  -- Writing absorption opacity in a separate file 'opafile.ab'
+  -- with NO expansion effect (here ts=100 days)
+  -- separate absorption made in 1997
+  -- bug with it corrected May 23 1998 in Saltsjoebaden
+  -- time-dependent Ni-Co-Fe done by Elena Sorokina
+  -- this version is to use 1, 2, 3, 4, 5 on parallel  processors
+
+  use mpi;
+  INTEGER stat(MPI_STATUS_SIZE);
+  SAVE;
+
+  --
+  -- MPI init
+  CALL MPI_INIT(ierr);
+  CALL MPI_COMM_RANK( MPI_COMM_WORLD, my_N,  ierr);
+  CALL MPI_COMM_SIZE( MPI_COMM_WORLD, Nprcs, ierr);
+  write(*,*)'my_N=',my_N;
+--!   pause;
+  call ronfict(my_N,Nprcs);
+
+  <*closefiles:  *>;
+
+/*! STOP
+    IF( Kcall .lt. 0 ) then
+       IF( Kcall .eq. -256 ) then ! hard synchronization for data saving
+          CALL MPI_BARRIER ( MPI_COMM_WORLD, ierr)
+          CALL MPI_FINALIZE(ierr)
+       RETURN
+       ELSE
+          CALL MPI_ABORT( MPI_COMM_WORLD, N, ierr)  ! ABORT due to ERROR
+       ENDIF
+      ENDIF
+*/
+
+ CALL MPI_FINALIZE(ierr);
+ stop ' ronfict ends normally';
+ end;
+
+%_closefiles:
+--    close(@WRES);
+    close(1);
+    close(9);
+    close(10);
+    close(15);

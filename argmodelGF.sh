@@ -477,15 +477,13 @@ Pause				# invoke the function Pause.
 
 if [ ! -f $HOMEStella/run/vladsf/lineatom.dat ]
 then
-#  ln -s $HOMEStella/../StellaMG/OpenStellaM/vladsf/lineatom.dat .
-  ln -s $HOMEStella/run/vladsf/lineatom_may07.dat lineatom.dat
-fi  
+  ln -s $HOMEStella/vladsf/lineatom.dat .
+fi
 
 if [ ! -f $HOMEStella/run/vladsf/yakovlev ]
 then
   ln -s $HOMEStella/OpenStellaM/vladsf/yakovlev .
-fi  
-
+fi
 
  echo check that  $HOMEStella/run/vladsf/${InputModel}.{1-6,ab} tables are non-zero
  Pause
@@ -596,7 +594,7 @@ fi
      echo strad.1 is small size="$stradfilesize"
      cp ${HOMEStella}/run/strad/strad.1.sample $fileStrad
    fi
- else  
+ else
    cp ${HOMEStella}/run/strad/strad.1.sample $fileStrad
  fi
 

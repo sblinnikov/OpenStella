@@ -1,5 +1,5 @@
 ##############################
-# MAKE FOR STELLA called from argmodel*.sh,  iorunStella.sh, and other interactive scripts
+# MAKE FOR STELLA
 ##############################
 
 #sys := $(shell uname)
@@ -224,13 +224,14 @@ INCLOUTUNI = opacityOutUni.inc stateq.inc \
 
 OBJDIR = obj
 
-PROGEVE1A = ../run/eve/eve1a.exe
+PROGEVE1A = ../eve/run/eve1a.exe
 PROGEVE1A := $(subst /,$(slash_l),$(PROGEVE1A))
 
-PROGEVE2 = ../run/eve/eve2.exe
+PROGEVE2 = ../eve/run/eve2.exe
 PROGEVE2     := $(subst /,$(slash_l),$(PROGEVE2))
 
-PROGSTNR6Y12M = ../run/strad/xstella6y12m.exe # non-relativ. with gdepos6 & volennoint
+
+PROGSTNR6Y12M = ../strad/run/xstella6y12m.exe # non-relativ. with gdepos6 & volennoint
 PROGSTNR6Y12M   := $(subst /,$(slash_l),$(PROGSTNR6Y12M))
 
 
@@ -238,7 +239,7 @@ PROGTT = ../strad/run/xttfit.exe
 PROGTT := $(subst /,$(slash_l),$(PROGTT))
 
 
-PROGRONFICT = ../run/vladsf/xronfict.exe
+PROGRONFICT = ../vladsf/xronfict.exe
 PROGRONFICT := $(subst /,$(slash_l),$(PROGRONFICT))
 
 
