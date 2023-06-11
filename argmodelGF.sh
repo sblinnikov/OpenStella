@@ -525,7 +525,7 @@ Pause				# invoke the function Pause.
           nohup  ./xronfshb.exe >& $HOMEStella/run/vladsf/ronf.log
                ;;
       'mixed')
-          nohup mpirun -np 6 ./xinsh.exe >& $HOMEStella/run/vladsf/ronf.log
+          nohup mpirun -np 6 --oversubscribe ./xinsh.exe >& $HOMEStella/run/vladsf/ronf.log
 #           nohup nice +20 mpirun -np 6 ./xinsh.exe >& $HOMEStella/run/vladsf/ronf.log # this does not work in bash
 #           nohup  ./xronfict.exe >& $HOMEStella/run/vladsf/ronf.log
                ;;
