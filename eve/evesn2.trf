@@ -298,7 +298,9 @@ _Od;
     <*O: FIND TAU & TPH *>;
     WRITE(@term,'(a,1p,2e12.3)')' Tph4,  Teff=',TPH4,Tph*Utp;
     WRITE(7,'(2(A,1P,G12.5))')' ALPHA=',ALPHA,'   TEFF=',TPH*UTP;
+
 %BM_modelfile:
+
     read(11) NZone,Nitind;
     @wterm ' in %BM_modelfile: NZone,Nitind=',NZone,Nitind;
     _Do k=1,NZone;
@@ -774,6 +776,7 @@ _Od;
     NFILE=Mfile;
     call StradIO('we',LUNIT,NFILE);
     <*rhopro: output profiles for plot *>;
+
 %BW_rhopro:
     Lunit=10;
     WRITE(10,'(2A,15(11X,A2))')

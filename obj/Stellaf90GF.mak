@@ -230,8 +230,11 @@ PROGEVE1A := $(subst /,$(slash_l),$(PROGEVE1A))
 PROGEVE2 = ../run/eve/eve2.exe
 PROGEVE2     := $(subst /,$(slash_l),$(PROGEVE2))
 
-PROGSTNR6Y12M = ../run/strad/xstella6y12m.exe # non-relativ. with gdepos6 & volennoint
+PROGSTNR6Y12M = ../run/strad/xstella6new.exe # non-relativ. with gdepos6 & volennoint
 PROGSTNR6Y12M   := $(subst /,$(slash_l),$(PROGSTNR6Y12M))
+
+PROGSTNR6Y12Mold = ../run/strad/xstella6y12m.exe # non-relativ. with gdepos6 & volennoint
+PROGSTNR6Y12Mold   := $(subst /,$(slash_l),$(PROGSTNR6Y12Mold))
 
 
 PROGTT = ../strad/run/xttfit.exe
@@ -273,6 +276,16 @@ FILES_TNR6Y12M = stradsep5tt.trf begradsep.trf cosetbgh.trf hcdfjrad.trf \
         burnc.trf volenpumnoint.trf hapsepnc.trf hcdhaph.trf \
         oparon.trf length.trf words.trf azdat.trf y12m.f
 OBJSTNR6Y12M := $(patsubst %.f,%.o, $(FILES_TNR6Y12M:.trf=.f))
+
+FILES_TNR6Y12Mold = stradsep5tt.trf begradsepOld.trf cosetbgh.trf hcdfjrad.trf \
+        hcdfnrad.trf traneq.trf eddi.trf  gdepos6.trf nthnew.trf \
+        stiffbghY12m.trf lbalsw.trf stradio.trf \
+        vtimef90.trf sahaandd.trf ubv.trf obsubvri.trf \
+        tt4strad.trf begtt.trf lbol.trf \
+        burnc.trf volenpumnoint.trf hapsepnc.trf hcdhaph.trf \
+        oparon.trf length.trf words.trf azdat.trf y12m.f
+OBJSTNR6Y12Mold := $(patsubst %.f,%.o, $(FILES_TNR6Y12Mold:.trf=.f))
+
 
 FILES_TTFIT = ttfit5.trf begradsep.trf vtimef90.trf \
         nthnew.trf  lbalsw.trf    words.trf \
@@ -337,8 +350,12 @@ eve1a: $(OBJEVE1A)
 eve2: $(OBJEVE2)
 	$(FC) $(LDFLAGS) $(PROGEVE2) $(OBJEVE2) $(LIBS) $(LIBDIRSYS)
 
-stella6y12m: $(OBJSTNR6Y12M)
+stella6new: $(OBJSTNR6Y12M)
 	$(FC) $(LDFLAGS) $(PROGSTNR6Y12M) $(OBJSTNR6Y12M) $(LIBS)
+
+
+stella6y12m: $(OBJSTNR6Y12Mold)
+	$(FC) $(LDFLAGS) $(PROGSTNR6Y12Mold) $(OBJSTNR6Y12Mold) $(LIBS)
 
 ttfit:  $(OBJTT)
 	$(FC) $(LDFLAGS) $(PROGTT) $(OBJTT) $(LIBS) $(LIBSM)
@@ -351,7 +368,8 @@ help:
 	@echo " eve1a          --  compile eve1a"
 	@echo " eve2           --  compile eve2"
 	@echo " ronfict        --  compile opacity tables in vladsf"
-	@echo " stella6y12m    --  compile strad with y12m without relativism and with introduced opacity"
+	@echo " stella6new     --  compile strad with y12m without relativism and with introduced opacity"
+	@echo " stella6y12m    --  compile strad with y12m and begradsepOld with introduced opacity"
 	@echo " ttfit          --  compile ttfit"
 	@echo " clean          --  rm -f *.o ../strad/*.f ../src/*.f ../eve/*.f"
 	@echo " cleandata      --  rm -f *.o core*"
@@ -382,6 +400,7 @@ stradrada.o:      stradrada.trf $(INCL)
 stradOutUni.o:    stradOutUni.trf $(INCLOUTUNI)
 begradOutUni.o:   begradOutUni.trf $(INCLOUTUNI)
 begradsep.o:      begradsep.trf $(INCL)
+begradsepOld.o:   begradsepOld.trf $(INCL)
 begradLowFreq.o:  begradLowFreq.trf $(INCL)
 cosetbgh.o:       cosetbgh.trf
 hcdfjrad.o:       hcdfjrad.trf $(INCL)

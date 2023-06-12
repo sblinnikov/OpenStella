@@ -65,6 +65,7 @@ Return;
 End;
 
 %_readmodel:
+
     @OpenFile;
     WRITE(@term,*)' StradIO opened file ',NFILE;
     _Repeat
@@ -74,7 +75,14 @@ End;
                                   -- to end if abs(NSTB) < abs(NSTA)
    10:CONTINUE;
 
+   if ( Nzon == 0 ) then;
+      WRITE(@term,*)' StradIO READ STEP=',NSTEP;
+      write(*,*) '  Error: in stradio.trf %_readmodel: Nzon=',Nzon;
+      stop 111;
+   endif;
+
 %_contmodel:
+
     @OpenFile;
     WRITE(@term,*)' StradIO opened file ',NFILE;
     _Repeat
@@ -89,6 +97,7 @@ End;
    11:CONTINUE;
 
 %_stinfomodel:
+
     @OpenFile;
     READ(@Lunit,IOSTAT=IOST,END=30)  @IOLINE,@IOSTARTint,@IOSTARTrea,
                                      @IOCONTint,@IOCONTrea;
@@ -158,7 +167,9 @@ End;
     60:
     @wterm ' EOF reached in file flx', lsaved;
    LUNIT=-1; -- EOF reached and what to do ?
+
 %_writemodel:
+
     write(@term,*)' ent wm';
     @OpenFile;
     CRAOLD=CRAP;
@@ -167,10 +178,17 @@ End;
                    @IOCONTint,@IOCONTrea;
     Begrun=.False.;
     write(@term,*)' leav wm';
+
 %_writeeve:
+
     @OpenFile;
+    write(*,*)'%_writeeve: Nzon=',Nzon;
+    pause;
+
     WRITE(@Lunit)  @IOLINE,@IOSTARTint,@IOSTARTrea;
+
 %_writecurve:
+
     write(@term,*)' ent wc';
     @OpenFile;
     write(@term,*)' opened wc, Lsaved=',Lsaved;

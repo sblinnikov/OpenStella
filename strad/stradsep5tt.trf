@@ -208,6 +208,7 @@ end;
 */
 
 %_openfiles:
+
     Open(unit=1,file='strad.1',status='old');
     READ(1,'(A)'); -- header
     read(1,'(A)') filestr;
@@ -242,6 +243,7 @@ end;
     Open(unit=28,file=Nidist,form='unformatted',status='unknown');
 --  Open(unit=7,file='delzon.res');
     Open(unit=76,file=balafile,status='unknown');-- file for energy balance
+
 %_openfiles_filenames:
 
    call words(filestr, wordm,lwordm, nwordm);
@@ -271,15 +273,16 @@ end;
   _Esac;
    dfile(1:)=runname(1:lrun)//'.dat';
    bmfile(1:)=runname(1:lrun)//'.bm';
-   model(1:)='../../eve/run/'//wordm(3)(1:lwordm(3))//'.mod';
-   Nidist(1:)='../../eve/run/'//wordm(4)(1:lwordm(4))//'.xni';
-   Opafile(1:)='../../vladsf/'//wordm(5)(1:lwordm(5)); -- standard path
+   model(1:)='../eve/'//wordm(3)(1:lwordm(3))//'.mod';
+   Nidist(1:)='../eve/'//wordm(4)(1:lwordm(4))//'.xni';
+   Opafile(1:)='../vladsf/'//wordm(5)(1:lwordm(5)); -- standard path
    Sumprf(1:)=runname(1:lrun)//'.prf';
    SumCur(1:)=runname(1:lrun)//'.crv'; -- opened in stradio unit=11
    Depfile(1:)=runname(1:lrun)//'.dep';
    Flxfile(1:)=runname(1:lrun)//'.flx'; -- opened in stradio unit=23
    swdet(1:)=runname(1:lrun)//'.swd';
    balafile(1:)=runname(1:lrun)//'.balance'; --file for energy balance
+
 %_closefiles:
     Close(unit=2);
     Close(unit=8);

@@ -258,11 +258,16 @@ _until kio^=0;
   --    JSTART=-IABS(JSTART); -- IN ORDER TO CHANGE METH, EPS, ETC.
       -- Jstart < 0 needed to initialize EPSJ in STIFFBGH
 --    ENDIF;
+
 %RM_Start:
+
     Lunit=9;
     NFILE=Model;
     @wterm '>>',Nfile,'<<';
     call StradIO('rm',Lunit,NFILE);
+    write(*,*)'after call StradIO Nzon=',Nzon;
+    pause;
+
  -- Define initial values for rad:
     @wterm ' Eko, Ekob: ',Eko,Ekob;
     EKO=EKO+EKOB;   -- EKO comes from Eve in @IOSTART, but usually = 0

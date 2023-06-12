@@ -1304,11 +1304,11 @@ _od;
    dfile(1:)=runname(1:lrun)//'.dat';
 --   Sumprf(1:)=runname(1:lrun)//'.prf'; -- in common/Files/
 --   SumCur(1:)=runname(1:lrun)//'.crv';
---   model(1:)='../../eve/run/'//wordm(3)(1:lwordm(3))//'.mod';
+--   model(1:)='../eve/'//wordm(3)(1:lwordm(3))//'.mod';
               -- in common/Files/
---   Nidist(1:)='../../eve/run/'//wordm(4)(1:lwordm(4))//'.xni';
-   Nidist(1:)='../../eve/run/'//model(1:len_trim(model)-4)//'.xni';
-   Opafile(1:)='../../vladsf/'//wordm(5)(1:lwordm(5)); -- standard path
+--   Nidist(1:)='../eve/'//wordm(4)(1:lwordm(4))//'.xni';
+   Nidist(1:)='../eve/'//model(1:len_trim(model)-4)//'.xni';
+   Opafile(1:)='../vladsf/'//wordm(5)(1:lwordm(5)); -- standard path
    Depfile(1:)=runname(1:lrun)//'.dep';
    Flxfile(1:)=runname(1:lrun)//'.flx';
    PHfile(1:)=runname(1:lrun)//'.ph'; -- change to .phf for the test
