@@ -266,7 +266,7 @@ _until kio^=0;
     @wterm '>>',Nfile,'<<';
     call StradIO('rm',Lunit,NFILE);
     write(*,*)'after call StradIO Nzon=',Nzon;
-    pause;
+ --   pause;
 
  -- Define initial values for rad:
     @wterm ' Eko, Ekob: ',Eko,Ekob;
