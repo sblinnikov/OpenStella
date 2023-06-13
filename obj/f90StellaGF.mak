@@ -1,5 +1,5 @@
 ##############################
-# MAKE FOR STELLA
+# MAKE FOR STELLA called from argmodel*.sh,  iorunStella.sh, and other interactive scripts
 ##############################
 
 # for standalone use define HOMEStella:
@@ -21,7 +21,7 @@ HOMEStella := ../
 #  SYSTYPE="pgf"
 #  SYSTYPE := "MPA_f95i"
 #endif
-#SYSTYPE="ifort"
+# SYSTYPE="ifort"
 # SYSTYPE := "lf"
 SYSTYPE=gfortran
 # SYSTYPE="cygwin_ifort"
@@ -69,8 +69,9 @@ ifeq ($(SYSTYPE),cygwin_ifort)
 #  FFLAGS = -c -static -debug:full -check:bounds,power,overflow -traceback -list -show:all
   LDFLAGS =
 #  LDFLAGS = /libs:static
-  LIBS =
-  LIBDIRSYS =
+  LIBS = ..\\lib\\liblnag.a	..\\lib\\libspars.a
+  LIBDIRSYS = /I"/cygdrive/c/Program Files/Intel/Compiler70/IA32/Lib/"
+#  LIBDIRSYS = /I"/cygdrive/c/Program Files/Intel/Compiler70/IA32/Lib/"
   UnixOrWin := "win"
 endif
 
@@ -84,7 +85,11 @@ ifeq ($(SYSTYPE),cygwin_f90)
   FFLAGS = -compile_only -static   -architecture:k7 -optimize:5 -fast -tune:k7 # for optimization Pentium
 #  FFLAGS = -c -static -debug:full -check:bounds,power,overflow -traceback -list -show:all
   LIBS =
+#  LIBS = ..\\lib\\liblnagcvf.a	..\\lib\\libsparscvf.a
   LIBDIRSYS =
+#  LIBDIRSYS = /libpath:"c:\\Program Files\\Microsoft Visual Studio\\DF98\\LIB\\" /libpath:"c:\\Program Files\\Microsoft Visual Studio\\VC98\\LIB\\"
+
+#  LIBDIRSYS = "c:/Program Files/Microsoft Visual Studio/DF98/LIB/"
   UnixOrWin := "win"
 endif
 
@@ -198,14 +203,15 @@ vpath %.trf ../eve:../strad:../vladsf:../src
 vpath %.f ../eve:../strad:../vladsf:../src
 vpath %.f90 ../src
 vpath %.o ./
-vpath %.inc ../src
+vpath %.inc ../src:../vladsf
+
 
 
 VPATH := $(STLHOME)src $(STLHOME)src/cp2k $(STLHOME)src/stl $(STLHOME)src/util $(STLHOME)vladsf $(STLHOME)sparse
 INCL_DIR := -I$(STLHOME)src/ -I$(STLHOME)src/cp2k -I$(STLHOME)src/stl -I$(STLHOME)src/util -I$(STLHOME)vladsf
 
 #--------------------------
-FILES_base =  kinds.F90  math_constants.f90  phys_constants.f90
+FILES_base =  kinds.F90  math_constants.f90  phys_constants.f90 stella_config.f90
 TEMP := $(FILES_base:.trf=.F)
 TEMP := $(patsubst %.F90,%.f90, $(TEMP:.f=.f90))
 TEMP := $(patsubst %.F90,%.f90, $(TEMP:.F=.f90))
@@ -232,25 +238,32 @@ INCLOUTUNI = opacityOutUni.inc stateq.inc sahaandd.inc \
 
 OBJDIR = obj
 
-PROGEVE1A = ../eve/run/eve1a.exe
+PROGEVE1A = ../run/eve/eve1a.exe
 PROGEVE1A := $(subst /,$(slash_l),$(PROGEVE1A))
 
-PROGEVE2 = ../eve/run/eve2.exe
+PROGEVE2 = ../run/eve/eve2.exe
 PROGEVE2     := $(subst /,$(slash_l),$(PROGEVE2))
 
-PROGSTNR6Y12M = ../strad/run/xstella6y12m.exe # non-relativ. with gdepos6 & volennoint
+PROGSTNR6Y12M = ../run/strad/xstella6new.exe # non-relativ. with gdepos6 & volennoint
 PROGSTNR6Y12M   := $(subst /,$(slash_l),$(PROGSTNR6Y12M))
+
+PROGSTNR6Y12Mold = ../run/strad/xstella6y12m.exe # non-relativ. with gdepos6 & volennoint
+PROGSTNR6Y12Mold   := $(subst /,$(slash_l),$(PROGSTNR6Y12Mold))
+
 
 PROGTT = ../strad/run/xttfit.exe
 PROGTT := $(subst /,$(slash_l),$(PROGTT))
 
-PROGRONFICT = ../vladsf/xronfict.exe
+
+PROGRONFICT = ../run/vladsf/xronfict.exe
 PROGRONFICT := $(subst /,$(slash_l),$(PROGRONFICT))
+
 
 
 FILES_EVE1A = evesn1a.trf sahaz.trf sahaandd.trf opazr.trf stradio.trf \
          azdat.trf length.trf
 OBJEVE1A := $(FILES_EVE1A:.trf=.o)
+
 
 FILES_EVE2 = evesn2.trf sahaz.trf sahaandd.trf opazr.trf stradio.trf \
          azdat.trf length.trf
@@ -276,6 +289,16 @@ FILES_TNR6Y12M = stradsep5tt.trf begradsep.trf cosetbgh.trf hcdfjrad.trf \
         burnc.trf volenpumnoint.trf hapsepnc.trf hcdhaph.trf \
         oparon.trf length.trf words.trf azdat.trf y12m.f
 OBJSTNR6Y12M := $(patsubst %.f,%.o, $(FILES_TNR6Y12M:.trf=.f))
+
+FILES_TNR6Y12Mold = stradsep5tt.trf begradsepOld.trf cosetbgh.trf hcdfjrad.trf \
+        hcdfnrad.trf traneq.trf eddi.trf  gdepos6.trf nthnew.trf \
+        stiffbghY12m.trf lbalsw.trf stradio.trf \
+        vtimef90.trf sahaandd.trf ubv.trf obsubvri.trf \
+        tt4strad.trf begtt.trf lbol.trf \
+        burnc.trf volenpumnoint.trf hapsepnc.trf hcdhaph.trf \
+        oparon.trf length.trf words.trf azdat.trf y12m.f
+OBJSTNR6Y12Mold := $(patsubst %.f,%.o, $(FILES_TNR6Y12Mold:.trf=.f))
+
 
 FILES_TTFIT = ttfit5.trf begradsep.trf vtimef90.trf \
         nthnew.trf  lbalsw.trf    words.trf \
@@ -333,14 +356,19 @@ TRFFLAGS = -nfs
 
 all: help
 
+
 eve1a: $(OBJEVE1A)
 	$(FC) $(LDFLAGS) $(PROGEVE1A) $(OBJEVE1A)
 
 eve2: $(OBJEVE2)
 	$(FC) $(LDFLAGS) $(PROGEVE2) $(OBJEVE2) $(LIBS) $(LIBDIRSYS)
 
-stella6y12m: $(OBJSTNR6Y12M)
+stella6new: $(OBJSTNR6Y12M)
 	$(FC) $(LDFLAGS) $(PROGSTNR6Y12M) $(OBJSTNR6Y12M) $(LIBS)
+
+
+stella6y12m: $(OBJSTNR6Y12Mold)
+	$(FC) $(LDFLAGS) $(PROGSTNR6Y12Mold) $(OBJSTNR6Y12Mold) $(LIBS)
 
 ttfit:  $(OBJTT)
 	$(FC) $(LDFLAGS) $(PROGTT) $(OBJTT) $(LIBS)
@@ -354,6 +382,7 @@ help:
 	@echo " eve1a          --  compile eve1a"
 	@echo " eve2           --  compile eve2 for models from modmake"
 	@echo " ronfict        --  compile opacity tables in vladsf (use better rparlnx.mak)"
+
 	@echo " stella6y12m    --  compile strad with y12m without relativism and with introduced opacity"
 	@echo " ttfit          --  compile ttfit"
 	@echo " clean          --  rm -f *.o ../strad/*.f ../src/*.f ../eve/*.f"
@@ -405,10 +434,9 @@ stradOutUni.o:    stradOutUni.trf $(INCLOUTUNI)
 stradsep7ttBQ.o:  stradsep7ttBQ.trf $(INCL)
 begradOutUni.o:   begradOutUni.trf $(INCLOUTUNI)
 begradsep.o:      begradsep.trf $(INCL)
+begradsepOld.o:   begradsepOld.trf $(INCL)
 begradLowFreq.o:  begradLowFreq.trf $(INCL)
 cosetbgh.o:       cosetbgh.trf
-dfnradrel.o:      dfnradrel.trf $(INCL)
-dfjradrel.o:      dfjradrel.trf $(INCL)
 hcdfjrad.o:       hcdfjrad.trf $(INCL)
 hcdfnrad.o:       hcdfnrad.trf $(INCL)
 traneq.o:         traneq.trf $(INCL)
@@ -420,14 +448,13 @@ gdepos6.o:        gdepos6.trf $(INCL)
 nthnew.o:         nthnew.trf $(INCL)
 stiffbgh.o:       stiffbgh.trf $(INCL)
 stiffbghY12m.o:   stiffbghY12m.trf $(INCL)
-stiffbghEps.o:    stiffbghEps.trf $(INCL)
 y12m.o        :   y12m.f
 lbalsw.o:         lbalsw.trf $(INCL)
 lbalswrel.o:      lbalswrel.trf $(INCL)
-lbalswBUG.o:      lbalswBUG.trf $(INCL)
 hcdhaph.o:        hcdhaph.trf $(INCL)
 obsubvri.o:       obsubvri.trf $(INCL)
-#findTradByMNKLum.o:  findTradByMNKLum.trf $(INCL)
+tt4strad.o:       tt4strad.trf $(INCL)
+findTradByMNKLum.o:  findTradByMNKLum.trf $(INCL)
 begtt.o:          begtt.trf $(INCL)
 begttOutUni.o:    begttOutUni.trf $(INCLOUTUNI)
 lbol.o:           lbol.trf $(INCL)
@@ -503,6 +530,11 @@ opaconst.o:        opaconst.trf $(INCL)
 length.o:          length.trf
 words.o:           words.trf
 
+#####
+# SRC/UTIL
+######
+stella_config.mod: stella_config.f90
+
 ###################################################
 
 
@@ -517,7 +549,7 @@ clean:
 	$(DEL) *.mod ../strad/*.lst ../src/*.lst ../eve/*.lst
 	( cd ../vladsf ; \
         	pwd ; \
-	$(DEL) *.o *.mod  mach.f dmach.f edensol.f linexpabav.f lineexpab_cor.f lineexpfast.f \
+	$(DEL) mach.f dmach.f edensol.f linexpabav.f lineexpab_cor.f lineexpfast.f \
                lineexpfastKur.f lineexpfastKur_taudist.f linterpol.f \
                ronfshb.f ronfndec.f ronftfixed.f ronfshbtfixed.f ronfndecbftot.f ronfshbbftot.f \
                opatest.f opatestgplot.f opatestswd.f opatestbftot.f opatestbf.f opaabtest.f \

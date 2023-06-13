@@ -183,7 +183,7 @@ End;
 
     @OpenFile;
     write(*,*)'%_writeeve: Nzon=',Nzon;
-    pause;
+--!     pause;
 
     WRITE(@Lunit)  @IOLINE,@IOSTARTint,@IOSTARTrea;
 
