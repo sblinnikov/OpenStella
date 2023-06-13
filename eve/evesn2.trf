@@ -576,7 +576,7 @@ _Od;
     _od
      rhoCen = rhofac*rhoCen/Urho/expfac**3;
     write (*,'(a,1p,g11.3)')' BM1=',BM1;
-    pause;
+--!     pause;
 
      BM1=BM1/UM; Rcen =Rcen/UR;   -- Transform to STELLA units
 --      Radius(1)=Rcen;
@@ -596,7 +596,7 @@ _Od;
           ' AM(K)*UM =',AM(K)*UM,' DM(K)*UM =',DM(K)*UM,
           ' Radius(K)*UR =',Radius(K)*UR,' Radius(K-1)*UR =',Radius(max(K-1,1))*UR,
           ' RHOeve(K)=',RHOeve(K);
-        pause;
+--!         pause;
       endif;
       if ( K^=1 ) then;
          AM(K)=AM(K-1)+DM(K);
