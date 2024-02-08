@@ -1059,8 +1059,8 @@ http://adsabs.harvard.edu/abs/2013MNRAS.428.1020M
 
 *.swd
 
-One of them has an extension swd (Shock Wave Details). It has outputs for Nzon
-zones at NTO prescribed moments of time TOO:
+One of the files produced by STELLA has an extension swd (Shock Wave Details). 
+It has outputs for Nzon zones at NTO prescribed moments of time TOO:
 
 time in days col 1 (when nonzero)
 radial zone number km col 2
@@ -1108,7 +1108,7 @@ is given in a bit retarded form t=t_comoving - Rout/c
 
 11. lgeng12 -- volume energy losses/gains, units 1e+12 erg/g/s
 
-12. lum40   --  abs(L/1e40) for L in erg/s
+12. lum40   --  L/1e40 for L in erg/s
 
 13. kappa -- Rosseland opacity, cm^2/g
 
