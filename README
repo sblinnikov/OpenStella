@@ -3,7 +3,7 @@ It describes only standard work with initial tests and scripts.
 When running *.sh scripts check carefully their outputs! 
 
 A universal script argmodel.sh (or argmodelGF.sh for gfortran) may be used for the fastest test of a weak SNIa model:
- argmodelGF.sh  m030307mhomo
+ argmodelGF.sh  m030307mhomo 1
 It will be fast if you copy src/opacityHomo.inc to src/opacity.inc before running the script
 (otherwise, if you use standard opacity.inc the script will spend an hour for building the opacity table).
 
