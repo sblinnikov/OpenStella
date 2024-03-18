@@ -1,4 +1,3 @@
-
 SYSTEM= -Dunix
 PERF=-DPOINTER
 CC=gcc
@@ -15,11 +14,14 @@ help:
 	@echo " 'make conf'    for configuration"
 	@echo " 'make all'     for make all executables"
 	@echo " 'make all95'   for make all executables for f95"
+	@echo " 'make allifc'  for make all executables for ifc"
 	@echo " 'make clean'   to delete all work files"
 
 all: trf trefor
 
 all95: trf trefor95
+
+allifc: trf treforifc
 
 trf:  trfu.c
 	$(CC) $(CCOPT) trfu.c -o trf
@@ -30,6 +32,9 @@ trefor:  trefor.o pass1.o pass2.o dtcdia.o
 trefor95:  trefor_95.o pass1.o pass2_95.o dtcdia.o
 	$(CC)  -o  trefor95  trefor_95.o pass1.o pass2_95.o dtcdia.o
 
+treforifc:  trefor_95.o pass1.o pass2ifc.o dtcdia.o
+	$(CC)  -o  treforifc trefor_95.o pass1.o pass2ifc.o dtcdia.o
+
 pass1.o:      pass1.c trfgen.h trfcode.h chargen.h tree.h pass1dep.h align.h
 
 dtcdia.o:     dtcdia.c trfgen.h trfcode.h chargen.h
@@ -37,6 +42,8 @@ dtcdia.o:     dtcdia.c trfgen.h trfcode.h chargen.h
 pass2.o:      pass2.c trfgen.h trfcode.h chargen.h tree.h pass2dep.h align.h
 
 pass2_95.o:   pass2_95.c trfgen95.h trfcode.h chargen.h tree.h pass2dep.h align.h
+
+pass2ifc.o:   pass2_95.c trfgenifc.h trfcode.h chargen.h tree.h pass2dep.h align.h
 
 trefor.o:     trefor.c trfgen.h trfcode.h chargen.h tree.h align.h
 
@@ -53,7 +60,7 @@ pass2dep.h : tun
 align.h : tun
 	./tun
 clean:
-	rm -f trefor.o trefor_95.o pass1.o pass2.o pass2_95.o dtcdia.o tun.o \
+	rm -f trefor.o trefor_95.o pass1.o pass2.o pass2_95.o pass2ifc.o dtcdia.o tun.o \
 	tun chargen.h  pass1dep.h pass2dep.h align.h core
 conf : tun
 	./tun

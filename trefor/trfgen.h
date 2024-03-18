@@ -2,7 +2,7 @@
 #define __TRFGEN__
 
 /* --     Length of array TEXT integer*4 */
-#define NTEXTMAX    900000 
+#define NTEXTMAX    2400000 
 /* --     Maximum number of Nodes */
 #define NODEMAX     2048
 /* --     Maximum number of loc. index buffer */

@@ -152,7 +152,7 @@ ifeq ($(SYSTYPE),gfortran)
   FC = gfortran
   FFLAGS_FIX = -c -g -fbounds-check  -fno-automatic
   FFLAGS_FIX = -c -g  -fno-automatic
-  FFLAGS_FIX = -c -O2  -ffixed-line-length-132 -fno-automatic -Wall
+  FFLAGS_FIX = -c -O2  -ffixed-line-length-none -fno-automatic -Wall
   FFLAGS := -ffree-form
   FFLAGS := $(FFLAGS_FIX) $(FFLAGS)
   LDFLAGS =

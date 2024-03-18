@@ -60,7 +60,8 @@ _trace '--------';
           SUM=SUM*X(I);
        _od
 %_Var:
-       Implicit real*8 (a-h,o-z);
+       Implicit none;
+       Integer NDIM;
        Parameter(NDIM=10000); -- maximum dimension of arrays
        Real*8 X(NDIM), SUM, PRODCT;
        Integer K(NDIM),I,M,N,L;

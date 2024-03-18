@@ -146,7 +146,7 @@ ifeq ($(SYSTYPE),"gfortran")
   FC = mpif90
   #FFLAGS_COMMON := -c -cpp -g -ffpe-trap='invalid,overflow' # -fbounds-check -Wall -ffpe-trap='invalid,zero,overflow,underflow,precision,denormal'
   FFLAGS_COMMON = -c -cpp -O3 -fbounds-check
-  FFLAGS_FIX := $(FFLAGS_COMMON) -ffixed-line-length-132 -fno-automatic -Wno-unused -Wno-unused-dummy-argument -std=legacy
+  FFLAGS_FIX := $(FFLAGS_COMMON) -ffixed-line-length-none -fno-automatic -Wno-unused -Wno-unused-dummy-argument -std=legacy
   FFLAGS := $(FFLAGS_COMMON) -ffree-form -ffree-line-length-none -Wno-tabs
   LDFLAGS =
   LIBS =

@@ -1,0 +1,17 @@
+program testPrep;
+
+_define @prepFort
+"_fortran
+#IF ASTRO
+_trefor"
+
+real :: a, b;
+_C
+#IF DEF SMTH
+_trefor
+a=2.;
+write(*,*)'a=',a;
+@prepFort
+b=a**2;
+write(*,*)'b=',b;
+end program testPrep;

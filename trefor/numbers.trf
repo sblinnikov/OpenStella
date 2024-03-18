@@ -1,0 +1,27 @@
+_outcom ;
+_trace '---------';
+program numbers;
+    integer Tot;
+    real Num, Sum, Avg;
+     <*ini: Initialize *>
+     <*get: Get and process numbers *>
+     <*print: Print Results *>
+stop;
+end;
+%_ini:
+     Sum=0.;
+     Avg=0.;
+     Tot=0;
+%_get:
+  _repeat
+    <*input: Input Num *>
+    Sum=Sum+Num;
+    Tot=Tot+1;
+  _until Tot==10;
+%_get_input:
+  write(*,*)' Enter next Number -- you must have 10 numbers';
+  read(*,*) Num;
+%_print:
+  write(*,*)' Sum=',Sum;
+  Avg=Sum/10.;
+  write(*,*)' Avg=',Avg;

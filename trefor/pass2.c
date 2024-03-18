@@ -134,15 +134,26 @@ static char /*WDIA[]={"C  TRF000  Syntactical or Alias error  "},  /*  %344324 *
 /*static Integer2 Crko; --=C */
 /*static char lcrko[2];
  Equivalence (Crko,Lcrko);*/
+//  static char TXTS[61]={':','I','F','(','.','N','O','T','.','(',
+// 		      'D','O','.','G','T','.','L','T','.','G',
+// 		      'E','.','L','E','.','N','E','.','E','Q',
+// 		      '.','A','N','D','.','O','R','.',')',')',
+// 		      'G','O','T','O',':','C','O','N','T','I',
+// 		      'N','U','E','$','G','O','T','O','(',')',','};
+//  Integer2 TBEG[22]={ 2,11,13,16,19,22,25,28,31,35,
+// 		     5,39,45,54,1,54,45,55,55,61,60,45};
+//  Integer2 TLNG[22]={9,2,4,4,4,4,4,4,5,4,
+// 		    5,6,9,5,10,1,10,4,5,1,2,1};   /* %3315 */
+
  static char TXTS[61]={':','I','F','(','.','N','O','T','.','(',
-		      'D','O','.','G','T','.','L','T','.','G',
-		      'E','.','L','E','.','N','E','.','E','Q',
+		      'D','O','.','>',' ','.','<',' ','.','>',
+		      '=','.','<','=','.','/','=','.','=','=',
 		      '.','A','N','D','.','O','R','.',')',')',
 		      'G','O','T','O',':','C','O','N','T','I',
 		      'N','U','E','$','G','O','T','O','(',')',','};
- Integer2 TBEG[22]={ 2,11,13,16,19,22,25,28,31,35,
+ Integer2 TBEG[22]={ 2,11,14,17,20,23,26,29,31,35,
 		     5,39,45,54,1,54,45,55,55,61,60,45};
- Integer2 TLNG[22]={9,2,4,4,4,4,4,4,5,4,
+ Integer2 TLNG[22]={9,2,1,1,2,2,2,2,5,4,
 		    5,6,9,5,10,1,10,4,5,1,2,1};   /* %3315 */
  Integer4 Remlab,LabSel,CurLab;  /*  %3312 */
  Integer2 Sclass,Spred,Cstack,Sprog,Nsel,Nc,Icase,Nproc;   /*  %331 */
@@ -652,7 +663,7 @@ Lab2003:; Pathal=Pathal+1;
 	    Jprog=2; CallOutLT(3);
 	    Cnsymb=Cnsymb+1; Sw=text[Cnsymb];
 	    while( isalnum(Sw) ) /* Digit or Letter */ {
-	       VARDO[Cvardo]=ToUpper(Sw); /* --=2 Add ToUpper */ 
+	       VARDO[Cvardo]=ToUpper(Sw); /* --=2 Add ToUpper */
 	       Cvardo=Cvardo+1;
 	       Synt=8; goto LabWriter;
 	       Lab3008:   Cnsymb=Cnsymb+1; Sw=text[Cnsymb];

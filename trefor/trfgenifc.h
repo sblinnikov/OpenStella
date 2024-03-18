@@ -2,7 +2,7 @@
 #define __TRFGEN__
 
 /* --     Length of array TEXT integer*4 */
-#define NTEXTMAX    2400000 
+#define NTEXTMAX    2400000
 /* --     Maximum number of Nodes */
 #define NODEMAX     2048
 /* --     Maximum number of loc. index buffer */
@@ -26,7 +26,7 @@
 /* --     Trefor truncating position */
 #define LC          256
 /* --     Output truncating position */
-#define LCOUT       192
+#define LCOUT       132
 /* --     Lexic classes for DTCF1 */
 #define NCLASS      20
 /* --     Highest include level */
@@ -47,4 +47,3 @@
 #define _S_CONTINUATION  ' '
 
 #endif
-

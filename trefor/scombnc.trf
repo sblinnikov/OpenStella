@@ -1,5 +1,3 @@
-_outcom;
-_trace '--------';
     PROGRAM SCOMB;
   /* On entry
     X(1:N) - the array of N real elements
