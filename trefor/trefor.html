@@ -1,0 +1,2140 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN"
+           "http://www.w3.org/TR/REC-html40/loose.dtd">
+<html>
+<meta name="GENERATOR" content="TtH 2.78">
+                  <br /><br />
+<title> TREFOR</title>
+
+<h1 align="center">TREFOR </h1>
+<br /><br />
+<p>
+
+<table align="center" border="0"><tr><td>
+<i>User's guide and references</i></td></table>
+<!--hboxt-->
+<br /><br /><br /><br /><br />
+<TABLE BORDER=0 CELLSPACING=0 CELLPADDING=0 WIDTH="650" VALIGN="TOP"
+ALIGN="CENTER">
+<font size="3" color="#000000" face="Arial">
+<p>
+S.I.Blinnikov <sup>1</sup>
+<p>
+  <sup>1</sup><i> Institute for Theoretical
+and Experimental Physics (ITEP, KKTPh), 117218, Moscow, Russia </i>
+<p>
+
+<center>
+A brief description is given of a preprocessor for structured
+design of programs in Fortran or in other languages.
+</center>
+</font>
+
+<h2>
+<a href="#Introduction">Introduction</a>
+
+<br>
+<a href="#Motivation"> More on Motivation </a>
+
+<br>
+<a href="#Input">Input language format</a>
+
+<br>
+<a href="#tree">The tree structure of the program design</a>
+
+<br>
+<a href="#scomb">A Nontrivial Example</a>
+
+<br>
+<a href="#resw">Reserved words</a>
+
+<br>
+<a href="#diag">Diagnostics </a>
+
+<br>
+<a href="#build">Building Trefor</a>
+
+
+</h2>
+
+
+<p>
+<h2>
+<a name="Introduction"><b>Introduction</b></a>
+</h2>
+<p>
+     Trefor is the text processor for program design, the main feature
+distinguishing it among other preprocessors being its ability to keep
+the structure not only of the code itself but also of the process of
+the construction, of the creation of a program. Using Trefor you
+save the history of the stepwise refinement of the code design in the
+same file which you submit to further compilation and then to run.
+The graph of the process of the stepwise refinement, described in
+many manuals on the structured programming, is actually a "Tree"
+(in the sense of the Graph Theory). This Tree is saved in your file
+by a special notation, bookkeeping the nodes of the tree and the paths
+connecting them. The excessive information introduced thereby helps
+you a lot not only in the process of the design, but also at the stage
+of testing and then in supporting and modifying the old codes.
+
+<p>
+Trefor is extensively used in several institutes in USSR and Russia
+since 1983
+and it has withstood the test of time. Originally it was developed
+for Fortran (Trefor = Tree Fortran), but now it is used also for C, C++,
+REXX, Pascal, etc.
+
+<p>
+The origin of the Trefor goes back to the ideas developed mainly
+by E.W. Dijkstra and his colleagues, see the books:
+
+<p>
+
+<dl compact="compact">
+<dt>
+1.</dt>
+<dd>
+ Structured programming,  O.-J. Dahl, E. W. Dijkstra &amp; C. A. R.
+   Hoare.  London, New York, Academic Press, 1972.
+</dd></dl>
+<dl compact="compact">
+<dt>
+2.</dt>
+<dd>
+ Dijkstra, E. W.
+     A discipline of programming.  Englewood Cliffs, N.J.
+   : Prentice-Hall, 1976.
+</dd></dl>
+<dl compact="compact">
+<dt>
+3.</dt>
+<dd>
+ Wirth, N.
+      Algorithmen und Datenstrukturen.  Stuttgart : Teubner, 1975.
+</dd></dl>
+<dl compact="compact">
+<dt>
+4.</dt>
+<dd>
+ Wirth, N.
+      Algorithms + data structures=programs.  Englewood Cliffs,
+    N.J. : Prentice-Hall, 1976.
+</dd></dl>
+<dl compact="compact">
+<dt>
+5.</dt>
+<dd>
+ Gries, D.,
+      The science of programming.  New York : Springer-Verlag,
+    1983.
+</dd></dl>
+<p>
+
+Motivation for need of a special preprocessor comes from two sources.
+The first is a need to manage a huge code with loops like
+(DERIVED FROM HARWELL LIBRARY ROUTINE MA30A ):
+
+<pre>
+C
+C        **********************************************
+C        ****    START OF MAIN ELIMINATION LOOP    ****
+C        **********************************************
+C
+         DO 178 PIVOT = ISTART, ILAST
+...
+</pre>
+<p>
+when the end of the loop
+comes 600 lines of the code later
+<pre>
+...
+ 178     CONTINUE
+C
+C        ********************************************
+C        ****    END OF MAIN ELIMINATION LOOP    ****
+C        ********************************************
+</pre>
+
+<p> Another source for the motivation of the Trefor development was the
+necessity to transform algorithms written in pseudocodes into a machine
+readable form automatically.
+<!-- E.g. Makino. (Take from flames). -->
+
+<p>
+
+
+<h2>
+
+<a name="Motivation"><b>More on Motivation</b></a>
+</h2>
+
+
+<!-- saved from url=(0060)http://www.netvista.com/ssingh/vb_notes/session1/stprog.html -->
+<p>
+
+Nowadays one can find on the Web many examples and tutorials on Structured programming concepts.
+Here we present a very simple example taken from <a href="http://www.netvista.com/ssingh/vb_notes/session1/stprog.html">www.netvista.com/ssingh/vb_notes/session1/stprog.html</a>
+
+<P><U><FONT face=Arial,Helvetica>Topics covered-</FONT></U>
+<OL>
+  <LI><FONT face=Arial,Helvetica>Importance of a structured program</FONT>
+  <LI><FONT face=Arial,Helvetica>Top down approach, example</FONT>
+</LI></OL>
+
+<P><FONT color=#000066 face=Arial><B><U>Why is structuring of a program
+important?</U></B></FONT> <!--mstheme--></FONT><!--msthemelist-->
+<TABLE border=0 cellPadding=0 cellSpacing=0 width="100%"><!--msthemelist-->
+  <TBODY>
+  <TR>
+    <TD vAlign=baseline width=42><IMG height=15 hspace=13
+      src="tecbull1.gif" width=15></TD>
+    <TD vAlign=top width="100%"><!--mstheme--><FONT
+      face="Arial, Arial, Helvetica"><FONT face=Arial>Structuring a program
+      helps to break it down into understandable
+      chunks.</FONT><!--mstheme--></FONT><!--msthemelist--></TD></TR><!--msthemelist-->
+  <TR>
+    <TD vAlign=baseline width=42><IMG height=15 hspace=13
+      src="tecbull1.gif" width=15></TD>
+    <TD vAlign=top width="100%"><!--mstheme--><FONT
+      face="Arial, Arial, Helvetica"><FONT face=Arial>Structuring a program can
+      help in easier debugging and maintenance of the program,&nbsp; as the
+      amount of details that the programmer has to understand for any one module
+      is less than dealing with the system as a
+      whole.</FONT><!--mstheme--></FONT><!--msthemelist--></TD></TR><!--msthemelist-->
+  <TR>
+    <TD vAlign=baseline width=42><IMG height=15 hspace=13
+      src="tecbull1.gif" width=15></TD>
+    <TD vAlign=top width="100%"><!--mstheme--><FONT
+      face="Arial, Arial, Helvetica"><FONT face=Arial>Modifications or
+      enhancements to a program become much easier due to modular approach and
+      better readability.</FONT><!--mstheme--></FONT><!--msthemelist--></TD></TR><!--msthemelist--></TBODY></TABLE><!--mstheme--><FONT
+face="Arial, Arial, Helvetica"><FONT face=Arial>
+<P>&nbsp;</FONT> <BR><FONT face=Arial><B><U><FONT color=#000066>Top down
+approach</FONT></U></B> - Structured programming results in top-down approach
+with a hierarchy of levels.&nbsp; The modules at each level are completely
+independent, so that they can be handled separately. In this kind of approach,
+the program is first designed in outline.&nbsp; The outline design gives a
+skeletal form of a program.&nbsp; Every working program consists of three
+modules in sequence -</FONT> <BR><FONT face=Arial>1.&nbsp; Initialization
+routine for initializing variables, opening files etc.</FONT> <BR><FONT
+face=Arial>2.&nbsp; Main body of a program to perform actual processing.</FONT>
+<BR><FONT face=Arial>3.&nbsp; Termination routine where all tidy up procedures,
+closing files and printing of totals and summaries is carried out.</FONT> </P>
+<P><B><U><FONT face=Arial>Given below is a flow chart of a program, which will
+explain what is structured programming and top-down approach.</FONT></U></B>
+</P>
+<P><FONT face=Arial>This is a flow chart for a program, which accepts 10 numbers
+from a &nbsp; user and prints their sum and average.</FONT> </P>
+<P><IMG alt="image6e5" height=346
+src="image6e5.gif" width=110><FONT
+face=Arial>&nbsp;</FONT></P>
+<P><IMG alt="imagedu7" height=213
+src="imagedu7.gif" width=114>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+<IMG alt="image6mu" height=478
+src="image6mu.gif" width=310>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <IMG
+alt="image4e0" height=309
+src="image4e0.gif" width=143> <BR>&nbsp; <!--mstheme--></FONT>
+
+<p>
+<b>
+End of the example from <a href="http://www.netvista.com/ssingh/vb_notes/session1/stprog.html">www.netvista.com/ssingh/vb_notes/session1/stprog.html</a>
+</b>
+
+<p>
+Flowcharts are  very useful for understanding, but in real life the programmers, sitting in front of their terminals, do not draw them, they just want to type their working codes
+as fast as possible. Trefor allows you to preserve the advantages of having a flow chart
+when you are already typing your algorithm in the process of its design.
+We explain this rewriting in the Trefor language the example which is given above as
+a set of flowcharts.
+
+<h3>
+
+<p>
+<tt> program numbers; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;integer Tot;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;real Num, Sum, Avg;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp; &lt;*ini: Initialize  *&#62;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp; &lt;*get: Get and process numbers  *&#62;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp; &lt;*print: Print Results  *&#62;   <br>
+stop;  <br>
+end; <br>
+%_ini: <br>
+&nbsp;&nbsp;&nbsp;&nbsp;  Sum=0.;  <br>
+&nbsp;&nbsp;&nbsp;&nbsp;  Avg=0.; <br>
+&nbsp;&nbsp;&nbsp;&nbsp;  Tot=0; <br>
+%_get: <br>
+&nbsp;&nbsp;_repeat<br>
+&nbsp;&nbsp;&nbsp; &lt;*input: Input Num  *&#62;   <br>
+&nbsp;&nbsp;&nbsp;&nbsp;Sum=Sum+Num;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Tot=Tot+1;<br>
+&nbsp;&nbsp;_until Tot==10;<br>
+%_get_input: <br>
+&nbsp;&nbsp;read(*,*) Num; <br>
+%_print: <br>
+&nbsp;&nbsp;write(*,*)' Sum=',Sum;<br>
+&nbsp;&nbsp;Avg=Sum/10.;<br>
+&nbsp;&nbsp;write(*,*)' Avg=',Avg;<br>
+</tt>
+</h3>
+
+That's it. After feeding this script to the Trefor preprocessor we get a fully workable
+Fortran code, while all two-dimensional structure contained in flowcharts is preserved.
+We do not need here a design for "start" and "return" statements.
+
+While designing a code in Trefor you just type in an appropriate
+place (most convenient for you) some special combinations of symbols
+which save the structure of the code. So the "flow chart" of the
+code is saved in the code itself, automatically adjusting to any
+changes which you might wish to introduce later.
+We call such a code a "design tree".
+More formal definitions are given below, but here we give just the
+main idea.
+
+<p>
+At any place of the code, where one might draw a node in a flowchart
+(all those squares, rhombuses, triangles etc...) we just type
+
+<p>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;*index: any explanatory text *&#62;  </tt>
+
+<p>
+
+ and then continue with standard Fortran (or C, etc.) text.
+At some moment,
+when we are ready to refine  what is going on
+in the node with our "index", we type:
+
+<p>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; %_ind1_ind2..._index: </tt>
+
+<p>
+
+ where "ind1", "ind2", ... are the nodes in which
+our node is embedded,
+and so we formally introduce the stepwise refinement.
+
+<p>
+   There are also other features, making Trefor convenient for writing long
+and complicated codes: macros, alias names, special structure
+constructions etc...
+
+<p>
+The original version of the Trefor was designed in 1983 by Sergei Weinstein
+(CNIIKA, Moscow, USSR, now retired from Parametric Technology, Haifa, Israel)
+and coded by Sergei Blinnikov (ITEP, Moscow, USSR)
+in Fortran-IV (more primitive than Fortran-77). Some features like alias definitions
+were added later by S.Blinnikov and O.Bartunov together with several versions
+of wrappers for different OS. A C-version of the Trefor compiler was
+coded by Vlad Popolitov (then at SAI, Moscow, Russia).
+One should note that the original Trefor (actually Fortran) version of the preprocessor
+is more robust and virtually free of bugs, while the C-version (which is coded
+directly, not using the preprocessor) sometime may encounter problems on huge
+input files (on order of 10<sup>4</sup> lines of code). Some improvemenst to MS Windows
+version have been supplied by Yaroslav Urzhumov. The latest version, btrefor95 and t95, developed by S.Blinnikov
+in 2012, is aimed at Fortran90/95 and more recent versions of Fortran language.
+<p>
+
+
+<h2>
+<a name="Input"><b>Input language format</b></a>
+</h2>
+
+<p>
+     To tell to the preprocessor, which language you wish to process just
+type (in the text of the Trefor-program):
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _Fortran
+
+<p>
+
+ or
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _REXX
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _Pascal
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _C
+
+<p>
+
+ etc. You may use the mixture of different languages
+in one file, if you wish it for some reason. If you type
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _Trefor
+
+<p>
+
+ you return to the standard <b>Trefor</b> environment,
+i.e., the preprocessor is
+prepared to output Fortran text, and the input is to be in the
+format where all operators are written from any column you like,
+but they should be delimited by ";", and the labels should be
+delimited by ":". The <b>_Trefor</b>
+regime is assumed as default in the
+beginning of any file submitted to the preprocessor.
+
+<p>
+<i>Example 1.1</i>
+
+<p>
+
+ Pure Fortran text in input:
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - -
+<pre>
+<tt>
+_FORTRAN
+      IF(A.GT.B)THEN
+        DO 25 I=1,N
+          Y(I,J)=Y(I,J)+Y(I,J+1)
+25      CONTINUE
+      ENDIF
+
+</tt>
+</pre>- - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+
+ Then the output is almost the same: only one
+comment is added:
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - -
+<pre>
+<tt>
+<p>
+C-&#62;Fortran section begins....
+      IF(A.GT.B)THEN
+        DO 25 I=1,N
+          Y(I,J)=Y(I,J)+Y(I,J+1)
+25      CONTINUE
+      ENDIF
+</tt>
+<p>
+
+</pre>- - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+ <i>Example 1.2</i>
+
+<p>
+
+ A bit less trivial is the next input text:
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - -
+<pre>
+<tt>
+_FORTRAN
+      IF(A>B)THEN
+        _Do I=1,N
+          Y(I,J)=Y(I,J)+Y(I,J+1)
+        _od
+      ENDIF
+</tt>
+<p>
+
+</pre>- - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+
+ Here you may use " &gt; " instead of ".GT." and the
+"<b>_Do</b><b>_od</b>" loop
+(the label is generated by the preprocessor), then the output
+is:
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - -
+<pre>
+<tt>
+<p>
+C-&#62;Fortran section begins....
+       IF(A.GT.B)THEN
+       DO 32757 I=1,N
+       Y(I,J)=Y(I,J)+Y(I,J+1)
+32757 CONTINUE
+      ENDIF
+</tt>
+<p>
+</pre>- - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+
+ The preprocessor generates labels in decreasing
+order starting from
+the initial value which may be changed at the installation. The
+standard starting value is below 32767 for compatibility with some old
+translators. You should not use your explicit labels in the range
+(30000-32767) but actually, using the Trefor,
+ you need explicit labels very rarely.
+
+<p>
+<i>Example 1.3</i>
+
+<p>
+
+ If you omit the word <b>_Fortran</b> in the
+beginning of the file, or if
+you type <b>_Trefor</b> in any place of the text, then the same piece
+may be typed from the first column, but you should then use ";" at
+the ends of Fortran operators:
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - -
+<pre>
+<tt>
+<p>
+IF(A&#62;B)THEN;
+_Do  I=1,N;
+   Y(I,J)=Y(I,J)+Y(I,J+1);
+ _od;
+ENDIF;
+</tt>
+<p>
+
+</pre>- - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+
+ The semicolon may be omitted before and/or after the closing
+"<b>_od</b>",
+so the next text is equivalent to the last one:
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - -
+<pre>
+<tt>
+<p>
+IF(A&#62;B)THEN;
+_Do  I=1,N;
+   Y(I,J)=Y(I,J)+Y(I,J+1)
+ _od
+ENDIF;
+</tt>
+<p>
+</pre>- - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+
+ Hereafter we use the <b>_Trefor</b> input format in
+our examples, as the
+most suitable for the design of complex codes.
+
+<p>
+<h2>
+<a name="tree"><b>The tree structure of the program design</b></a>
+</h2>
+
+<p>
+
+<br /> Here we give some definitions, but they are not quite formal,
+and the best way to understand the way of writing codes in
+Trefor is to read carefully our Example 2.1.
+<!-- and the printouts in the Appendix.-->
+
+<p>
+DESIGN TREE
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd> the sequence of a ROOT NODE and of its CHILD NODEs
+ </dd></dl></dl>ROOT NODE
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd> NODE TEXT
+ </dd></dl></dl>CHILD NODE
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd> NODE HEADLINE and the NODE TEXT. A node may have no children.
+            If the root node has no children, then the whole code is
+            presented in the form usual for standard languages, without
+            additional information on the code structure
+ </dd></dl></dl>NODE TEXT
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd> the sequence of TERMINAL TEXT segments and/or COMMENTS
+            and/or DESIGN REQUESTs and/or DEFINITIONS for macros and
+            aliases
+ </dd></dl></dl>NODE HEADLINE
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd> %GLOBAL_INDEX:
+            where "%" is typed in the first column.
+            So the percent sign is reserved as an escape symbol
+            only here: in any other
+            position in the text you may use "%" if you need it
+ </dd></dl></dl>TERMINAL TEXT
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd> text in the language you use,
+ALIASes and some RESERVED WORDs.
+In <b>_Fortran</b> and <b>_Trefor</b>
+input also the symbols given below
+with their Fortran equivalents
+ </dd></dl></dl><table><tr><td width=250>
+ </td><td width=250>
+ <font face="symbol">^</font
+>   </td><td width=250>
+.NOT.</td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+ &amp;       </td><td width=250>
+.AND.</td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+ !        </td><td width=250>
+.OR. </td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+  =  =      </td><td width=250>
+.EQ. </td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+ <font face="symbol">^</font
+> =  </td><td width=250>
+.NE. </td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+  &lt;  &gt;      </td><td width=250>
+.NE. </td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+  &gt;       </td><td width=250>
+.GT. </td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+  &lt;       </td><td width=250>
+.LT. </td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+  &gt;  =      </td><td width=250>
+.GE. </td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+ <font face="symbol">^</font
+> &lt;  </td><td width=250>
+.GE. </td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+  &lt;  =      </td><td width=250>
+.LE. </td><td width=250>
+ </td></tr></table>
+
+<table><tr><td width=250>
+ </td><td width=250>
+ <font face="symbol">^</font
+> &gt;  </td><td width=250>
+.LE. </td><td width=250>
+ </td></tr></table>
+
+
+<p>
+Of course, you may use any form (old or new) you wish
+
+<p>
+for these logical and relation notations
+
+<p>
+COMMENTS
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd> `two minuses' and then the comment:
+            -- any text to the end of the line (as in Ada).
+            `Slash-asterisk' comment as in PL/1 or REXX:
+            /* text */
+ </dd></dl></dl>
+<dl><dl compact="compact"><dt>&nbsp;&nbsp;</dt><dd> Here text may include many
+            lines with nodes, other comments
+            etc. This comment may be used several times within one
+            line. You may use other comments in the language you use.
+            E.g. in <b>_Fortran</b>
+            input (but not in <b>_Trefor</b>) you may use
+            "C" or "*" in the first column of the line.
+            The language
+            _C ascribes some special meaning to "--",
+            so it may not be
+            used as a comment: the preprocessor will understand this
+            correctly if you type _C at the beginning of the C section
+ </dd></dl></dl>DESIGN REQUEST
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd>  &lt; *LOCAL INDEX:  SPECIFICATION of the child node * &gt;
+            If the ":" is omitted or replaced by another symbol,
+            then everything inside the `brackets'
+            " &lt; *" and "* &gt; "
+            is understood as a comment.
+            If the closing "* &gt; " is not met
+            until the next node headline
+            then the error diagnostics is issued
+ </dd></dl></dl>LOCAL INDEX
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd> sequence of alphanumeric characters. The local index
+            is "short" if it is only one letter or digit.
+            The local index is "long" if it contains more than one
+            character
+ </dd></dl></dl>    SPECIFICATION
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd> text of any length, not
+containing the combination "* &gt; "
+ </dd></dl></dl>    GLOBAL_INDEX
+
+<p>
+
+<dl><dl compact="compact"><dt>:: = </dt><dd> concatenation of local indices on the path to the node.
+            Two delimiters are used here:
+            the underscore "_" shows that the next local index in the
+            concatenation is the long one (but of course everything
+            will be OK if it is in fact the short one);
+            the point "." shows that the next local index is short
+            and all other characters appearing in the concatenation
+            are understood as short local indices even if they are
+            not separated by any delimiters until there again appears
+            "_". This helps to write very long node headlines
+            in the huge complex codes using short local indexes.
+            The difference in their use is explained in examples
+            below
+
+<p>
+
+<h2>
+<a name="scomb">A Nontrivial Example</a>
+</h2>
+
+<p>
+
+</dd></dl></dl><i>Example 2.1</i>
+
+<p>
+
+ Here we want to solve a small problem: to find in SUM
+the sum of products, containing all combinations of exactly M different elements of an array X(1:N).
+
+<p>
+
+ The <b>_Trefor</b> input file for actually working code
+
+<p>
+ *** <tt>Top of File</tt> *************************************
+<pre>
+<tt>
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ ----HERE BEGINS THE ROOT NODE-----
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ Throughout this text the comments with "--$$" are just for
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ HELP of Trefor. In actual design tree they are  omitted without
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ any loss of information on the algorithm
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$
+PROGRAM SCOMB;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* On entry
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; X(1:N)- the array of N real elements
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; M - integer &#62;0
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; On exit
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SUM is the sum of products of all combinations of M
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; different elements of X
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; */ --$$ this is the comment of PL1/REXX type
+&lt;*Var: variables description *&#62;;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ this is the request with local index "Var"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$
+&lt;*Input: input N, M, and the values of X(1:N) *&#62;;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  this is the request with local index "Input"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* abstract variable  SET - the ordered set of indexes K(I):
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; K(1) &lt; K(2) &lt; ...&lt; K(M)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Statement QS:   SUM is the sum of products
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; X(K(I)) for all { K(I)} == SET &lt;=SET(CURRENT) */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;*1: make QS true for SET==SET(INITIAL) *&#62;; --$$ local index 1
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _While &lt;*2:  SET <font face="symbol">^</font> = SET(FINAL) *&#62; _Do
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;*3: find next  SET  keeping QS invariant *&#62;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _od; -- Here SET==SET(FINAL) and QS==. TRUE., that is
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; -- sum contains all needed products of X(K(I))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; WRITE(6,*)' N=',N,' &nbsp;&nbsp;&nbsp;  M=',M,' &nbsp;&nbsp;&nbsp;  SUM=', SUM;
+END;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ --- THE END OF THE ROOT NODE ----
+<p>
+%_Input:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ the previous line is the headline of a child node, "_" shows
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ that alphanumeric sequence till the next "_" or "."  or ":"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ is the one long local index
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Write(0,*)'Enter the array length N';
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; READ(5,*) N;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Write(0,*)'Enter the number of elements in product M';
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; READ(5,*) M;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Write(0,*)'Enter the array X(1:N)';
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; READ(5,*) (X(I),I=1,N);
+<p>
+%3:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  the previous line is the headline of another child node, the absence of
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ "_" or the presence of "." tells that only one character is used
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  as the local index, i.e. the local index is the short one.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  We begin the design from this node since at the moment it is
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  not yet decided, what is the actual structure of the abstract
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  variable SET, but we already can develop the algorithm
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;*A: find new SET , i.e. new { K(I) } *&#62;;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &lt;*B: put in PRODCT the product of X(K(I)) *&#62;;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SUM = SUM + PRODCT
+<p>
+%3A:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  the previous line is the headline of the node with local index "A"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  requested in the node %3, the global index here is "3A" which is
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  equivalent to "_3_A", or to "_3.A", or to ".3.A", or to "3.A",
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  or to "3_A", but not to "_3A", since there is no request with
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$  the local index "3A"
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* concrete presentation of  SET:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  K(I) - array of integer  M  elements */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; I=M;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _While K(I)==N+I-M _Do
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  I=I-1
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _od;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; K(I)=K(I)+1;
+      /* The next loop is valid only for Fortran-77
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; since for  m==1  Fortran-66  executes Do-loop L=1,0 */
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _Do L=1, M-1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;  K(I+L)=K(I)+L
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _od
+<p>
+%3B:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; PRODCT=1.D0;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _Do I=1,M;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; PRODCT = PRODCT*X(K(I))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _od
+<p>
+%2:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; K(1) <font face="symbol">^</font
+>= N+1-M
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-- If K(1)==N+1-M all the K(I) reach their final value
+<p>
+%1:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; SUM=1.D0; -- !!!
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _Do I=1,M;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; K(I)=I;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  &nbsp;&nbsp;&nbsp; SUM=SUM*X(I);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _od
+<p>
+%_Var:
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ the design of any node may be done in any convenient place
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ after the end of the requesting node, e.g. the description
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ of variables may be done at the end of the design tree when
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$ you already know all the desired data structures
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--$$
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Implicit real*8 (a-h,o-z);
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Parameter(NDIM=10000); - maximum dimension of arrays
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Real*8 X(NDIM), SUM, PRODCT;
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Integer K(NDIM),I,M,N,L;
+</tt>
+
+</pre>  *** <tt>End of File</tt> **************************************
+
+<p>
+&nbsp;&nbsp;&nbsp;   If this file is scomb.trf and you type
+
+<p>
+&nbsp;&nbsp;&nbsp;   trf -nfl scomb.trf
+
+<p>
+then you obtain the code scomb.f which may be submitted for translation
+to a Fortran compiler. Moreover you have a Trefor listing, scomb.lst,
+with detailed Trefor diagnostics.
+<p>
+&nbsp;&nbsp;&nbsp;   If you type
+
+<p>
+&nbsp;&nbsp;&nbsp;   trf scomb.trf
+
+<p>
+then you get an executable ("a.out" in Linux)  if your .trfrc file is set up correctly.
+<p>
+<!-- In the Appendix we give the printouts for scomb.trf (without our
+additional meta-comments), the listing, scomb.lst, and the resulting Fortran
+text scomb.f. -->
+     <br />
+<p>
+<br />
+
+<h2>
+<a name="resw"><b>Reserved words</b></a>
+</h2>
+<p>
+
+ All reserved words begin with the underscore sign "_".
+    You may use upper, lower or
+mixed case typing them. The delimiter for a reserved
+word is any non-alphanumeric symbol
+(usually it is just a blank). Digits are ignored
+in reserved words and you may use them just for labeling,
+e.g.
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _Fortran &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    _FORTRAN77  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  _FoR66Tran
+
+<p>
+
+ produce quite the same effect: telling the
+preprocessor that the input
+will be in the Fortran format, and nothing more.
+
+<p>
+   Now we collect the reserved words for general case.
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;   Input/output format:
+
+<p>
+&nbsp;&nbsp;&nbsp;   <b>_Trefor</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    (default)
+
+<p>
+&nbsp;&nbsp;&nbsp;   <b>_Fortran</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;   <b>_REXX</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;   <b>_Pascal</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;   <b>_C</b>
+
+<p>
+
+ The file produced after the processing (command trf -[options]
+Fname) will be
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;   Fname.f
+
+<p>
+
+ and you should change the extension .f to the language
+you are actually using if its not Fortran.
+
+<p>
+You may use <b>_Pascal</b> format with many
+languages with similar syntaxes
+(actually <b>_REXX</b> and <b>_Pascal</b>
+formats are the same from the point of
+view of the Trefor).
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;   <b>_Include</b>  Fname;
+
+<p>
+
+ this is used to include other files written in the
+format declared.
+It is used to include the file
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;   Fname.inc
+
+<p>
+
+ where the file Fname.inc will be searched for in
+the alphabetical order on
+the accessed disks. The included file may contain other <b>_include</b>
+instructions.
+
+<p>
+&nbsp;&nbsp;&nbsp;  <b>_IncludeN</b>  Fname
+
+<p>
+
+ is equivalent to <b>_Include</b> but the
+contents of included files is not printed in the Trefor listing.
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;   <b>_Offprint</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;   <b>_Onprint</b>
+
+<p>
+
+ to switch off/on the output to the listing file.
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;   <b>_Trace</b>
+
+<p>
+
+ This word will generate messages in the output
+file about leaving and entering the nodes. E.g.,
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;     '- &gt;  Entering Node % _Var:'
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;     ' &lt; - Leaving  Node % _Input:'
+
+<p>
+
+ If you type in the example of file Scomb Trefor:
+
+<p>
+&nbsp;&nbsp;&nbsp;  <b>_trace</b> 'write(5,*)'
+
+<p>
+
+ then you obtain in output the Fortran text:
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+<tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      PROGRAMSCOMB
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      WRITE(5,*)'-&#62; Entering Node % _Var:'
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      IMPLICITREAL*8(A-H,O-Z)
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      PARAMETER(NDIM=10000)
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      REAL*8X(NDIM),SUM,PRODCT
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      INTEGERK(NDIM),I,M,N,L
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      PARAMETER(PI=3.141592653589793D0)
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      WRITE(5,*)'&lt;-Leaving  Node % _Var:'
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      WRITE(5,*)'-&#62;Entering Node % _Input:'
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      Write(0,*)'Enter the array length N'
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      READ(5,*)N
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      Write(0,*)'Enter the number of elements in product M'
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      READ(5,*)M
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      Write(0,*)'Enter the array X(1:N)'
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      READ(5,*)(X(I),I=1,N)
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;      WRITE(5,*)'&lt;-Leaving  Node % _Input:'
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;       ... </tt>
+
+<p>
+ - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+
+ So you may receive messages from executing
+program tracing the
+nodes. Of course, the first message about the
+node "% _Var:" does
+not allow to obtain correct Fortran code. To avoid this you just
+type "O"in the node head:
+
+<p>
+% _Var:O
+
+<p>
+
+ where "O" is from "Offtrace". In the example
+considered you should also type
+
+<p>
+%2:O
+
+<p>
+
+ Try not to do this and look to the output Fortran
+file after issuing the command "trf -nf scomb.trf" .
+
+<p>
+&nbsp;&nbsp;&nbsp;   You may also trace the nodes with some variables:
+
+<p>
+&nbsp;&nbsp;&nbsp;   <b>_trace</b> "write(6,'(" X(1) = ",G12.3,A)')
+X(1),";
+
+<p>
+
+ the message from trace will be always just added
+to your "write...".
+Note, that here you are forced to use quotation
+as outside delimiter
+since inside you use the apostrophe (cf. below the rules for
+alias definitions).
+
+<p>
+To trace the nodes actively in other languages you have to
+use other appropriate
+instructions together with the <b>_trace</b>, e.g.
+in REXX:
+
+<p>
+&nbsp;&nbsp;&nbsp;  <b>_trace</b> 'SAY'
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;  <b>_Define</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;  <b>_Deflist</b>
+
+<p>
+
+ The description of these is given below in Sect. 5.
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+<br />
+<p>
+  The following constructions have sense ONLY for standard <b>_Trefor</b>
+or <b>_Fortran</b> input when preprocessor outputs Fortran .
+
+<p>
+ We have already used in the examples above
+ <b>_Do</b><b>_od</b> and
+<b>_While</b><b>_Do</b><b>_od</b> constructions.
+The best way to understand how any
+Trefor construction is transformed to the standard Fortran is
+to type an example, then to issue command
+
+<p>
+&nbsp;&nbsp;&nbsp;   trf
+
+<p>
+
+ and then to browse the created Fortran file.
+Here we do not give
+the detailed syntax but only some sketch and examples.
+
+<p>
+
+ SQUARE BRACKETS "[", "]": they are used in the
+sense of BEGIN and
+END of Algol-60 (or Pascal), but only in fixed constructions.
+
+<p>
+<i>Example 4.1</i>
+
+<p>
+The <b>_do</b> loop from example 1.3:
+
+<p>
+<pre>
+<tt>
+<p>
+  _Do  I=1,N;
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    Y(I,J)=Y(I,J)+Y(I,J+1)
+
+<p>
+ _od </tt>
+<p>
+
+</pre>
+ is equivalent to the construction
+
+<p>
+<tt>_Do  I=1,N [ Y(I,J)=Y(I,J)+Y(I,J+1) ] </tt>
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+ Example 4.2
+
+<p>
+
+ Embedded <b>_do</b> loops (Nordsieck predictor in
+multi-step ODE-solvers):
+
+<p>
+<pre>
+<tt>
+<p>
+ _Do J1=1,NQ;
+
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _Do J2=J1,NQ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;  J=NQ-J2+J1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;  _Do I=1,N;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;  Y(I,J)=Y(I,J)+Y(I,J+1)
+_Od_Od_Od; </tt>
+<p>
+
+</pre>
+ or, equivalently:
+
+<p>
+<pre>
+<tt>
+<p>
+ _Do J1=1,NQ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _Do J2=J1,NQ;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; J=NQ-J2+J1;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;  _Do I=1,N;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;  Y(I,J)=Y(I,J)+Y(I,J+1)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;  _Od
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _Od2
+ _Od1; </tt>
+<p>
+
+</pre>
+ As we have already noted the numbers in reserved
+words have no effect on the output: actual
+  labels are produced by the preprocessor
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; A sketch of other constructions. We use the following
+abbreviations:
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; log.expression &nbsp;&nbsp;&nbsp; :: =  logical expression of Fortran/Trefor
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Op.sequence  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; :: =  sequences of Trefor operators
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <b>_While</b> log.expression <b>_do</b>
+
+<p>
+ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      Op.sequence
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   <b>_Od;</b>
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <b>_Repeat</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   Op.sequence
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <b>_Until</b> log.expression;
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <b>_Repeat</b>[
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   Op.sequence
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ];   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   - infinite loop
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <b>_While</b> log.expression1 <b>_do</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Op.sequence
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <b>_Until</b> log.expression2;
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_If</b> log.expression <b>_then</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Op.sequence
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <b>_Fi</b>  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  - needed at Langlvl = 66 or to pass
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;    - control inside if-then-else-endif construction
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   - at Langlvl = 77
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <b>_If</b> log.expression <b>_then</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Op.sequence1
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_else</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Op.sequence2
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Fi</b>
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Case</b> Int. <b>_Of</b> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;
+- here Int. is an integer expression
+
+<p>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  _ Op.sequence1  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - and underscore delimits
+
+<p>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ Op.sequence2  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - the Op.sequences
+
+<p>
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; _ Op.sequence3
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;    .......
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; _ Op.sequenceN
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_esac</b>
+
+<p>
+
+ this is equivalent to
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  <b>_Case</b> Int. <b>_Of</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; _1 Op.sequence1
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; _2 Op.sequence2
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; _3 Op.sequence3
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;   .......
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; _N Op.sequenceN
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_esac</b>
+
+<p>
+
+ and executes like GOTO(lab1,lab2,...,labN),Int.
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Select</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; _1 log.expression1 [ Op.sequence1 ]
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; _2 log.expression2 [ Op.sequence2 ]
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; _3 log.expression3 [ Op.sequence3 ]
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;   ........
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; _N log.expressionN [ Op.sequenceN ]
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_End</b>
+
+<p>
+
+ the <b>_select</b> operator finds the first I which
+has log.expression-.TRUE. and then executes the Op.sequenceI .
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Leave</b> I
+
+<p>
+
+ is used to exit _do I=m1,m2,m3; .... _od  loop.
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Leave</b> All
+
+<p>
+
+ exits all embedded _do_od loops
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Iterate</b> I
+
+<p>
+
+ is used to iterate _do I=m1,m2,m3; ....
+_od  loop. i.e. does
+GOTO label of CONTINUE for corresponding loop.
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Iterate</b> All
+
+<p>
+
+ control passes to CONTINUE of the outermost loop.
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+Sometimes you do not know if a logical expression can be readily
+inserted in <b>_While</b>, <b>_If</b> and <b>_Select</b>
+construction. E.g., in the Example 2.1 :
+
+<p>
+<pre> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_While</b>  &lt; *2:  SET <font face="symbol">�</font
+> =  SET(FINAL) * &gt;  <b>_Do</b>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;  &lt; *3: find next SET keeping QS invariant * &gt;
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Od</b>;
+<p>
+
+</pre>
+ the variable SET is abstract and perhaps you need
+some additional
+arithmetics before you obtain the logical relation. If you need this
+then you may replace
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  log.expression
+
+<p>
+
+ by
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; [Op.sequence] log.expression
+
+<p>
+
+ at the stage of designing the node and you do not
+need to bother about this at the stage of requesting the node.
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Outcom</b>
+
+<p>
+
+ Use this word to output comment to Fortran text.
+You may then meet some
+troubles if use Ada type comments in <b>_Fortran</b> input,
+so at present for <b>_Fortran</b> input it is better to use
+the old-fashioned
+"C" or "*" in the first column, if you for some reason need the
+Fortran output with comments.
+
+<p>
+  After <b>_Outcom</b> you may type
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_trace</b> `- - - - - - - -'
+
+<p>
+
+ then you find in the output file the comments
+informing you on the current node headlines.
+
+<p>
+<br /> Here we reserve the symbol "@" as the escape one
+so it may be used in other sense
+only in character constants or in comments. If this symbol is already
+reserved by the compiler ( as in some version of Pascal ) then it
+should be changed to another one at the installation of Trefor.
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  Syntax:
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Define</b> @name1 `defining sequence1'
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @name2 "defining sequence2"- comments are allowed here
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @name3 defining_sequence2_with_no_blank
+_'_no_"_in_one_line
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ; - this closes the _define, may be omitted if the next
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp; - nonblank is not "@"
+
+<p>
+
+ Here "name" is an alphanumeric sequence
+
+<p>
+
+ Use apostrophe if defining sequence contains quote sign.
+
+<p>
+
+ Use quote if defining sequence contains apostrophe.
+
+<p>
+
+ You produce a macro definition if the defining
+sequence contains
+other alias names, perhaps not yet defined. You may redefine them many
+times when you need it before use.
+
+<p>
+
+ NB: the <b>_Define</b> is visible only in the
+child nodes requested after it!
+So you may use alias names to protect some important variables from
+unauthorized use in parallel nodes.
+
+<p>
+For <b>_Trefor</b> and <b>_Fortran</b> use also:
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Deflist</b> @name1,@name2,...,@nameN;
+
+<p>
+
+ then you obtain identifiers z00001, z00002 ....
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_deflist</b> idef00 @name1,@name2,...
+
+<p>
+
+ using any 6-character identifier as a mask,
+       then in this example you obtain identifiers idef01, idef02 ....
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Label</b> @name1,@name2,@name3....
+
+<p>
+
+ automatically produces labels.
+
+<p>
+ <br /><br /><br /><br />    To call a procedure use:
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_call</b> @Name;
+
+<p>
+   The description of a procedure has the form:
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_Proc</b> @Name;
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; /* the body of the procedure */
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <b>_return</b>;
+
+<p>
+The Name of a procedure must be an alias, i.e. it must begin with
+the "at_sign" symbol '<tt>@</tt>'.
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+       Example of a procedure name:
+
+<p>
+         <tt>_PROC @GET_WORD</tt>;
+
+<p>
+The body of a procedure may contain any constructions of Trefor
+including macros  and other procedures. To call this procedure use
+
+<p>
+         <tt>_call @GET_WORD</tt>;
+
+<p>
+The recursive calls are also allowed (but then one must avoid
+the appearance of infinite loops).
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+       Example of a procedure containing another procedure:
+
+<p>
+ <tt>_PROC @HEAP;   - HeapSort
+
+<p>
+           _PROC @SIFT;
+
+<p>
+              &lt; *sift: * &gt; ;
+
+<p>
+           _RETURN;
+
+<p>
+           L=N/2+1; R=N;
+
+<p>
+           _WHILE L &gt; 1 _DO
+
+<p>
+              L=L-1; _CALL @SIFT;
+
+<p>
+           _OD;
+
+<p>
+           _WHILE R &gt; 1 _DO
+
+<p>
+              W=A(1); A(1)=A(R); A(R)=W;
+
+<p>
+              R=R-1; _CALL @SIFT;
+
+<p>
+           _OD;
+
+<p>
+         _RETURN; </tt>
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+When calling a procedure one must obey all the rules of work
+with aliases.
+Using a special variable
+       <tt>@RET_Name_of_PROCEDURE</tt>,
+which keeps the number of the procedure call, one can arrange
+recursive calls, save this variable in a
+       <tt>STACK</tt> (an integer array). Similarly one can save
+variables changing inside a procedure and restore them before the
+return.
+
+<p>
+       Example of a procedure with an argument:
+
+<p>
+       <tt>_Proc @A; - argument  i
+
+<p>
+             Sarg(p)=i; Sret(p)=@Ret_A; p=p+1; - Store CALLER in STACK
+
+<p>
+                &lt; *A: body of procedure A which may contain
+
+<p>
+                    recursive calls of A * &gt; ;
+
+<p>
+             p=p-1; i=Sarg(p); @Ret_A=Sret(p); - Return to CALLER
+
+<p>
+           _Return;</tt>
+
+<p>
+- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
+
+<p>
+   The    PROCEDUREs may be used only with
+   the Fortran as the object language.
+
+<p>
+   In the output file a procedure looks like:
+
+<p>
+       <tt>LAB0  CONTINUE
+
+<p>
+       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; /* body of procedure */
+
+<p>
+       &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GOTO(LAB1,LAB2,...,LABN), I6R00K</tt>
+
+<p>
+The _call @Name_proc is transformed into Fortran sequence
+
+<p>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .........
+
+<p>
+         &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <tt>GOTO LAB0
+
+<p>
+       LAB1  CONTINUE
+
+<p>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .........
+
+<p>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   GOTO LAB0
+
+<p>
+       LAB2  CONTINUE
+
+<p>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; .........
+
+<p>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; GOTO LAB0
+
+<p>
+       LABN  CONTINUE </tt>
+
+<p>
+Here <tt>LAB0</tt> - is the label of the procedure head
+       <tt>LAB1,LAB2,...,LABN</tt> - are the labels of return
+      to the instruction after <tt>_call</tt>
+       ( <tt>N</tt> - is the number of calls),
+       <tt>I6R00K</tt> - an integer variable controlling the return.
+
+<p>
+<br />   <i>Diagnostics for procedures</i>
+
+<p>
+
+<dl compact="compact">
+<dt>
+1.</dt>
+<dd>
+<tt>'Procedure not found'</tt> -
+ </dd></dl>The procedure is either not defined or is not visible from the
+current node. The severity code is 8 (a fatal error).
+
+<p>
+       Example:
+
+<p>
+      <tt>Program QUQU;
+
+<p>
+           &lt; *var: * &gt; ;
+
+<p>
+           &lt; *A: * &gt; ;
+
+<p>
+           &lt; *B: * &gt; ;
+
+<p>
+        Stop;END;
+
+<p>
+        %A:
+
+<p>
+          _Proc @Local;
+
+<p>
+             &lt; *body: * &gt; ;
+
+<p>
+          _Return;
+
+<p>
+           &lt; *Calc: * &gt; ;
+
+<p>
+        %B:
+
+<p>
+           &lt; *Preparation: * &gt; ;
+
+<p>
+          _Call @Local;</tt>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - the procedure <tt>@Local</tt> is not visible from the node <tt>%B</tt>
+
+<p>
+To use the procedure <tt>@Local</tt> one has to move its description
+from the node <tt>%A</tt> into the root of a program:
+
+<p>
+        <tt>Program QUQU;
+
+<p>
+         &lt; *var: * &gt; ;
+
+<p>
+          _Proc @Local;
+
+<p>
+             &lt; *body: * &gt; ;
+
+<p>
+          _Return;
+
+<p>
+           &lt; *A: * &gt; ;
+
+<p>
+           &lt; *B: * &gt; ;
+
+<p>
+        Stop;END;
+
+<p>
+        %A:
+
+<p>
+           &lt; *Calc: * &gt; ;
+
+<p>
+        %B:
+
+<p>
+           &lt; *Preparation: * &gt; ;
+
+<p>
+          _Call @Local;</tt>
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; - now <tt>@Local</tt> is visible from the node <tt>%B</tt>
+
+<p>
+<br>
+<h2>
+<a name="diag"><b> Diagnostics </b> </a>
+</h2>
+
+<p>
+
+
+<br />    <tt>IFAIL</tt> - diagnostics code.
+
+<p>
+  <tt>IFAIL</tt>=3  - fatal error (severity 8)
+
+<p>
+   <tt>IFAIL</tt>=2  - warning (severity 4)
+
+<p>
+<i>List of messages for the
+   1st stage (the formation of the program tree)</i>
+
+<p>
+  <tt>1.'Error in service word  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      IFAIL=3
+
+<p>
+    2.'Local index repeated  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      '  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;     IFAIL=3
+
+<p>
+    3.'The node  is not requested &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      IFAIL=2
+
+<p>
+    4.'The node requested in line &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   'XXXX
+
+<p>
+    5.'Text ignored until the node end  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   '
+
+<p>
+    6.'Its  design begins in line  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   'XXXX
+
+<p>
+    7.'No design for node from line &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  'XXXX &nbsp;&nbsp;&nbsp;  IFAIL=2
+
+<p>
+    8.'Reference to nonexistent node &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   IFAIL=2
+
+<p>
+    9.'Case or Select not opened.  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   IFAIL=3
+
+<p>
+   10.'Alias not identified   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      '  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      IFAIL=3
+
+<p>
+   11.'Unrecognizable symbol in Fileid. &nbsp;&nbsp;&nbsp; '  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       IFAIL=3
+
+<p>
+   12.'Unable to open include file. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       IFAIL=2
+
+<p>
+   13.'Caution: TREFOR TRACE active! &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        '
+
+<p>
+   14.'Caution: COMMENTS will be output! &nbsp;&nbsp;&nbsp;  '
+
+<p>
+   15.'Deflist basis is too short &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;        IFAIL=3
+
+<p>
+   16.'Forbidden alias definition &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       IFAIL=3
+
+<p>
+   17.'Current tree completed.   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;      '
+
+<p>
+   18.'Include level exceeds max.level! &nbsp;&nbsp;&nbsp;   '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   IFAIL=3
+
+<p>
+   19.'Print full listing forced. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  '
+
+<p>
+   20.'Warning:Unknown service word!!! &nbsp;&nbsp;&nbsp; '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   IFAIL=2
+
+<p>
+   21.'Print full listing started. &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  '
+
+<p>
+   22.'Node head already in line &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;  'XXXX &nbsp;&nbsp;&nbsp;  IFAIL=3
+
+<p>
+   23.'Procedure not found &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       ' &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   IFAIL=3
+
+<p>
+   24.'Char. constant not completed'
+
+<p>
+   25.'Request or comment not closed'</tt>
+
+<p>
+ <br /><br /><i>The 2nd stage (the formation of output text)</i>
+
+<p>
+  <tt>1.'Node head already in line' XXXX
+
+<p>
+    2.'No design for the NODE requested in line:'XXXX
+
+<p>
+      'Node number:'YYY' with local index:'AAAA
+
+<p>
+    3.'In NODE beginning in line:'XXXX' not defined  ALIAS @'AAAA
+
+<p>
+    4.'In NODE beginning in line:'XXXX' recursion in ALIAS @'AAAA</tt>
+
+<p>
+ <br /><br /><i>The following line may be written as the comment in the output Fortran text)</i>
+
+<p>
+<tt>'CERROR('XXXX') Syntactical or Alias Error'</tt>
+
+<p>
+<br /><br />
+
+<h2>
+<a name="build"><b> Building Trefor </b> </a>
+</h2>
+
+<p>
+If you got somewhere the file ctrf.tar.gz
+then unzip and untar it, e.g.
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   tar -xzvf ctrf.tar.gz
+
+<p>
+or if that does not work
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   gzip -d ctrf.tar.gz
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   tar -xvf ctrf.tar
+
+<p>
+Now issue commands
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   make conf
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   make all
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   make clean
+
+<p>
+When you are prompted type "Y" if it goes OK.
+
+<p>
+Now you have 2 binary executables: trf* and trefor* - put them
+to your local bin/ directory or work with Trefor in the same directory
+you have them currently.
+
+<p>
+The execution of trf command is controlled by the .trfrc file. Read it
+carefully and edit it to connect trf execution with the default COMPILER
+(and compiler's options) and the default EDITOR that you wish to use.
+The trf command looks for .trfrc file in the current directory, and
+if it is not found there then in the system directories (/usr/local/lib
+etc.). If .trfrc is not found at all then internal default options
+are used.
+
+<p>
+The Trefor
+options are explained there in .trfrc file, or you may type
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   trf
+
+<p>
+and you will see the list of the options.
+
+<p>
+E.g.,
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   trf -nf your_code.trf
+
+<p>
+(where -nf means No Fortran compilation)
+will not submit your code to the Fortran compiler (defined in .trfrc
+file).
+
+<p>
+If you wish to submit your code to Fortran compilation, then type, e.g.,
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   trf - -c -O -qarch=pwr2 your_code.trf
+
+<p>
+Here you do not define any Trefor options and
+" -c -O " etc. -  they are your Fortran options.
+
+<p>
+If you type
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   trf -e your_code.trf
+
+<p>
+then you open your_code.trf file for editing with the EDITOR - this
+happens only if a severe error occurred at the stage of Trefor preprocessing.
+
+<p>
+All needed Trefor options are written in one group, e.g.,
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;   trf -nfl your_code.trf
+
+<p>
+- no fortran compilation and preservation of the Trefor listing
+(your_code.lst) file.
+
+<p>
+Use
+
+<p>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; a2ps -p [-Pprinter] your_code.lst
+
+<p>
+command to printout Trefor listings.
+
+<p>
+</font>
+</table>
+
+<br /><br /><hr /><small>File translated from
+T<sub><font size="-1">E</font></sub>X
+by <a href="http://hutchinson.belmont.ma.us/tth/">
+T<sub><font size="-1">T</font></sub>H</a>,
+version 2.78.<br />On 19 Sep 2000, 12:06.</small>
+</html>
+
