@@ -455,16 +455,17 @@ $ mpirun -n 6 ronfpar.exe
 ____________________________________________
 
 3. On STELLA units
-___________________________________________
-STELLA v raznostnyh s'hemah ispoljzuet svoi
-bezramernye edinicy (v nih uravnenija naibolee prosty, tak v fizike
-chastic chasto berut takie edinicy, chtoby h=c=1). No STELLA dolzhna
-vzaimodejstvovatj s programmami uravnenij sostojanija, opacity i t.d.,
-napisannymi, vozmozhno, drugimi ljudjmi, i s drugoj storony, vydavatj
-chto-to dlja poljzovatelja v kakih-to udobnyh dlja nego edinicah,
-vrode M_\sun i t.p. Poehtomu, dlja interface prihoditsja vvoditj
-prehodnye koefficienty edinic i vnutrj (k Ursos) i naruzhu (na pechatj
-ili grafiku).
+____________________________________________
+
+STELLA employs dimensionless variables in its difference schemes
+(the equations become simpler for special units, e.g. workers in particle
+physics use units giving h=c=1). But STELLA  must interact
+with the codes for equation of state, opacity, etc.,
+which are written, as a rule, by other people. On the other hand,
+STELLA must output data for users in the units convenient to them,
+like M_\sun, etc. Thus we need interfaces with coefficients for transition
+to other units, either into inside  (like Ursos == EoS) and outside (for
+printouts or plots).
 
 So, the basis for all units in STELLA (like h and c in particle physics)
 is
@@ -474,15 +475,46 @@ is
   CG  - Newton's gravitation constant
 
 All fundamental constants are prepared and kept in
-src/fundrad.inc by the program src/fundparm.trf
-and units (almost all) are prepared by eve/evenew.trf
+src/fundrad.inc:
+
+ Parameter(
+             Pi    = 3.1415926535897932d+00,
+             hPlanc= 1.0545716280D-27,
+             Cs    = 2.9979245800D+10,
+             Boltzk= 1.3806504000D-16,
+             Avogar= 6.0221417900D+23,
+             AMbrun= 1.6605387832D-24,
+             AMelec= 9.1093821500D-28,
+             echarg= 4.8032042700D-10,
+             CG    = 6.6742800000D-08,
+             CMS   = 1.9884000000D+33,
+             RSol  = 6.9551000000D+10,
+             ULGR  = 1.4000000000D+01,
+             UPURS = 1.0000000000D+07, -- interface for EoS in Ursos
+             ULGPU = 7.0000000000D+00,
+             ULGEU = 1.3000000000D+01,
+             UPC   = 3.0856776000D+18, -- interface for EoS in Ursos
+             UTP   = 1.0000000000D+05, -- interface for EoS in Ursos
+             URHO  = 1.0000000000D-06, -- interface for EoS in Ursos
+             CARAD = 7.5657680191D-15,
+             CSIGM = 5.6704004778D-05,
+             ERGEV = 1.6021764864D-12,
+             GRADeV= 1.1604505285D+04,
+             RADC  = 7.5657680191D-02,
+             CTOMP = 4.0062048575D-01,
+             CCAPS = 2.6901213726D+01,
+             CCAPZ = 9.8964034725D+00);
+
+The file fundrad.inc is produced by the program src/fundparm.trf
+(with account of fundamental units from PDG -- Particle Data Group)
+and STELLA units (almost all) are prepared by eve/evenew.trf
 and written to the binary file *.mod, read by STELLA
 (via begrad.trf). If STELLA starts a continuation of a run,
 they are read from the binary file *.prf (the initial data structure
 of which repeats the structure of the *.mod file) written by STELLA
 itself after each MBATCH steps (defined in *.dat file in strad/run).
 
-Given the basic units UR, Urho and CG we have other STELLA units
+Given the basic units (UR, Urho and CG) we have other STELLA units
 
   Utime=(4*pi*CG*Urho)**(-1/2)
   UPressure=Urho*(UR/Utime)**2
@@ -493,7 +525,7 @@ Note, that those units are needed explicitly only for writing down
 the dimensionless equations. Since STELLA does the calculations
 in these dimensionless form it does not use all those identifiers
 explicitly. E.g. for the pressure, STELLA needs an interface value
-only between the eq. of state routine Ursos (which outputs
+only between the equation of state routine Ursos (which outputs
 the pressure in units UPUrs, e.g. in CGS) and its own UPressure.
 This interface value is denoted
   UP=UPressure/UPUrs
@@ -503,7 +535,15 @@ where CMS is the value of the solar mass in grams (in fundrad.inc).
 But now UM is used mostly for the outward interface.
 
 Some units which are not needed for the initial model, and not
-defined in eve, (mostly for radiation) are defined in strad/begrad.trf.
+defined in eve, (mostly for radiation) are defined in strad/begrad*.trf,
+e.g. strad/begradsep.trf .
+
+    UFREQ=BOLTZK*UTP/(2.d0*PI*HPLANC); -- unit of frequency
+    CKRAD=6.D+01/PI**4*CSIGM*UTP**4*UTIME**3/(URHO*UR**3);
+    CCL=CS*1.D+08/UFREQ; -- TO TRANSFORM FROM ANGSTREMS & V.V.
+    CFLUX=60.D0*CSIGM*(UTP/PI)**4;
+    CLUM=32.D0*PI/3.D0*(CSIGM*UR*UTP**4/URHO); -- FL0 INTO LUMINOSITY
+    CLUMF=4.D0*PI*UR**2*CFLUX; -- FH INTO LUMINOSITY
 
 Those units that have endings *PRI are prepared for the printouts
 or graphics.
@@ -1059,7 +1099,7 @@ http://adsabs.harvard.edu/abs/2013MNRAS.428.1020M
 
 *.swd
 
-One of the files produced by STELLA has an extension swd (Shock Wave Details). 
+One of the files produced by STELLA has an extension swd (Shock Wave Details).
 It has outputs for Nzon zones at NTO prescribed moments of time TOO:
 
 time in days col 1 (when nonzero)
